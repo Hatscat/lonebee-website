@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cloud.umami.is; connect-src https://gateway.umami.is; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
     <title>Page not found · Lone Bee</title>
     <meta name="description" content="This page doesn't exist. Lone Bee's games are one click away.">
     <meta name="robots" content="noindex">
@@ -16,6 +16,7 @@
     <link rel="preload" href="/fonts/atkinson-hyperlegible-next.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/site.css">
+    <script type="module" src="/js/analytics.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -50,7 +51,7 @@
     <footer class="site-footer">
       <div class="wrap footer-bar">
         <img src="/img/logo-small.svg" width="125" height="32" alt="">
-        <p>© Lone Bee · No cookies, no tracking.</p>
+        <p>© Lone Bee · No cookies · Crafted with <img class="glyph" src="/img/ui/heart.svg" width="14" height="12" alt="love"> <span class="nowrap">in the Pyrenees <img class="glyph" src="/img/ui/flag-fr.svg" width="18" height="12" alt="France"> <img class="glyph" src="/img/ui/mountain.svg" width="18" height="12" alt=""></span></p>
       </div>
     </footer>
   </body>

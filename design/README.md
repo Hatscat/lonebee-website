@@ -1,7 +1,7 @@
 Lone Bee is a one-person game studio. Its identity is **Hive and amber**: the warm dark of the hive
 holds every page, honey gold marks only what matters, beeswax cream carries the words, and one cool
 note of dusk sky marks links and focus. Outside the hive, the same palette paints a lone honeybee
-crossing a meadow at golden hour.
+over a valley of the Pyrenees at golden hour.
 
 One rule holds it together: **one palette of 32 colors paints both the pixel art and every color of
 the interface.** A color that is not in the palette doesn't exist.
@@ -14,7 +14,7 @@ color, and on any raw length outside a media query.
 
 ## Voice and copy
 
-- Write short, plain sentences, in the first person: "I make small games, one at a time." No hype
+- Write short, plain sentences, in the first person: "I craft games with ♥". No hype
   words (no "amazing", "epic", "revolutionary").
 - US English: color, center, favorite.
 - Sentence case for every heading, button and link: "Play today's puzzle", never "Play Today's
@@ -23,10 +23,13 @@ color, and on any raw length outside a media query.
   Game**. Lead Limpid Chess with the word "smooth", as its own site does.
 - Every claim must hold for every game, the future ones included: no blanket "free" or "no ads".
 - Buttons say what happens: "Play in the browser", "Get it on Google Play", "Follow on itch.io".
-- Separate facts with a middle dot: "© Lone Bee · No cookies, no tracking."
+- Separate facts with a middle dot: "© Lone Bee · No cookies · Crafted with ♥ in the Pyrenees"
 - One bee wink per page at most: "Also in the hive: a Roblox game…", "This page flew away." Never a
   pun in a button.
-- No emoji, anywhere.
+- No emoji. Where a symbol says it better than a word (the heart, the French flag, a peak), use
+  the brand's pixel glyphs (`.glyph`, 2x), with alt text that reads as the word: "love",
+  "France"; a purely decorative one gets `alt=""`. They match the art and look the same on
+  every system, where emoji vary (Windows draws the French flag as the letters "FR").
 
 ## Color
 
@@ -203,9 +206,13 @@ Atkinson Hyperlegible was drawn by the Braille Institute for low-vision readers:
 - No anti-aliasing beyond what palette colors give, no blur, no smooth gradients. Shade with ramps;
   blend bands with hatched strata (rows of horizontal dashes) or ordered dithering.
 - One light per image. The brand's light is golden hour: a low sun, warm rims on the edges facing
-  it, cool shadows. The interface's own pixels (the wordmark and its honey cell, titles, buttons)
-  are lit from the upper left and cast their hard drops down and right; illustrations follow their
-  scene's light (the mark from the upper right, the hero from the low sun on the right).
+  it, cool shadows (the 404 page is the blue hour after it, its glow fallen to heather). The
+  interface's own pixels (the wordmark and its honey cell, titles, buttons) are lit from the upper
+  left and cast their hard drops down and right; illustrations follow their scene's light (the
+  mark from the upper right, the hero from the low sun on the right).
+- One land: a valley of the Ariège Pyrenees, where Lone Bee lives, under the twin massif of the
+  Montcalm and the Pic d'Estats. Snow on the summits, forest on the slopes, a lone mountain pine,
+  and summer pasture: ling, gentians, red clover, carline thistles. New scenes stay in that valley.
 - The bee is a real honeybee, never a cartoon: a head with a large compound eye and no pupil,
   elbowed antennae, a fuzzy thorax, a striped abdomen longer than the thorax, translucent veined
   wings, jointed legs, a pollen load.

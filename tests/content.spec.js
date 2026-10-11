@@ -78,6 +78,26 @@ test("games in the works are listed, without links", async ({ page }) => {
   await expect(section.locator(".section-note")).toContainText("CrazyGames");
 });
 
+/**
+ * What a screen reader says for an element: its text, with each image's alt text in its place.
+ * @param {import("@playwright/test").Locator} locator
+ */
+const spoken = (locator) =>
+  locator.evaluate((root) => {
+    /** @param {Node} node @returns {string} */
+    const say = (node) =>
+      node instanceof HTMLImageElement ? ` ${node.alt} ` : node.nodeType === Node.TEXT_NODE ? (node.textContent ?? "") : [...node.childNodes].map(say).join("");
+    return say(root).replace(/\s+/g, " ").trim();
+  });
+
+test("the tagline and the footer say it with pixel glyphs, read aloud as words", async ({ page }) => {
+  expect(await spoken(page.locator(".hero-tagline"))).toBe("I craft games with love");
+  expect(await spoken(page.locator(".site-footer p"))).toBe("© Lone Bee · No cookies · Crafted with love in the Pyrenees France");
+  for (const glyph of await page.locator("img.glyph").all()) {
+    await expect(glyph).toHaveJSProperty("complete", true);
+  }
+});
+
 test("followers find itch.io, GitHub and the email address", async ({ page }) => {
   const follow = page.locator("#follow");
   await expect(follow.getByRole("link", { name: "Follow on itch.io" })).toHaveAttribute("href", ITCH);

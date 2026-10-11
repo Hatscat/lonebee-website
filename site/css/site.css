@@ -72,6 +72,19 @@ a:hover {
   image-rendering: pixelated;
 }
 
+/* A pixel glyph inside a line of text (the heart, the flag, the peak): it stands on the baseline,
+   as tall as a capital, and stays crisp. */
+.glyph {
+  display: inline-block;
+  vertical-align: baseline;
+  image-rendering: pixelated;
+}
+
+/* Words that must not part, such as a place and its glyphs. */
+.nowrap {
+  white-space: nowrap;
+}
+
 /* Layout */
 
 .wrap {

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cloud.umami.is; connect-src https://gateway.umami.is; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
     <title>Lone Bee · Indie games</title>
     <meta name="description" content="Lone Bee is a one-person game studio. Play Limpid Chess and Draw my code, see what's coming next, and follow new games on itch.io.">
     <link rel="canonical" href="https://lonebee.games/">
@@ -17,15 +17,16 @@
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/site.css">
     <script type="module" src="/js/hero.js"></script>
+    <script type="module" src="/js/analytics.js"></script>
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Lone Bee">
     <meta property="og:title" content="Lone Bee">
-    <meta property="og:description" content="Small games, made one at a time by a solo developer: Limpid Chess, Draw my code, and more on the way.">
+    <meta property="og:description" content="Indie games crafted with love by a solo developer in the Pyrenees: Limpid Chess, Draw my code, and more on the way.">
     <meta property="og:url" content="https://lonebee.games/">
     <meta property="og:image" content="https://lonebee.games/img/og.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Pixel art: a honeybee hovers over a meadow at sunset, beside the words Lone Bee, indie games, one at a time">
+    <meta property="og:image:alt" content="Pixel art: a honeybee hovers over a mountain meadow at sunset, beside the words Lone Bee, indie games, crafted with love">
     <meta name="twitter:card" content="summary_large_image">
     <script type="application/ld+json">
       {
@@ -77,7 +78,7 @@
         </div>
         <div class="wrap hero-copy">
           <h1 id="hero-title" class="hero-title">Lone Bee</h1>
-          <p class="hero-tagline">I make small games, one at a time.</p>
+          <p class="hero-tagline">I craft games with <img class="glyph" src="/img/ui/heart.svg" width="14" height="12" alt="love"></p>
           <ul class="actions">
             <li><a class="button button-primary" href="#games">See the games</a></li>
             <li><a class="button" href="https://lone-bee.itch.io/">Follow on itch.io</a></li>
@@ -177,7 +178,7 @@
     <footer class="site-footer">
       <div class="wrap footer-bar">
         <img src="/img/logo-small.svg" width="125" height="32" alt="">
-        <p>© Lone Bee · No cookies, no tracking.</p>
+        <p>© Lone Bee · No cookies · Crafted with <img class="glyph" src="/img/ui/heart.svg" width="14" height="12" alt="love"> <span class="nowrap">in the Pyrenees <img class="glyph" src="/img/ui/flag-fr.svg" width="18" height="12" alt="France"> <img class="glyph" src="/img/ui/mountain.svg" width="18" height="12" alt=""></span></p>
       </div>
     </footer>
   </body>

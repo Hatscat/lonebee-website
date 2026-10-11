@@ -4,7 +4,7 @@
 hub for players and followers, and later a portfolio. It is a static site on GitHub Pages under the
 custom domain `lonebee.games`. Each game lives on its own subdomain (`limpidchess.lonebee.games`,
 `drawmycode.lonebee.games`) and in its own repository. English only, US spelling. No backend, no
-cookies, no tracking.
+cookies; Umami counts page views, without cookies, on the production host only.
 
 - Implementation plan, decisions and launch steps: `docs/PLAN.md`. Tick its boxes as steps land.
 - Design system: `design/README.md` is the brand book, `design/tokens.json` holds every token,
@@ -40,6 +40,7 @@ site/            Deployed as is to GitHub Pages. No build step.
   js/hero.js       Sizes the hero art to whole device pixels and animates it. The page works without it.
   js/flight.js     The bee's flight path, shared with art/build.js so both draw the same frames.
   js/hero-data.js  Generated: the hero's size, layers and motion.
+  js/analytics.js  Adds Umami's tracker on lonebee.games only (the website Draw my code shares).
   fonts/           Jersey 10, Atkinson Hyperlegible Next and Mono, each with its OFL license.
   img/             Generated art, plus img/games/ (card images, from each game's own art).
 design/          tokens.json (source of truth), README.md (brand book), components/ (docs and
@@ -60,10 +61,14 @@ docs/PLAN.md     The plan.
 - `site/` is what GitHub Pages serves: plain HTML5, CSS3 and vanilla JS modules. No framework,
   bundler or build step for the site itself; only the tokens and the art are generated, and their
   output is committed.
-- Zero runtime dependencies and zero third-party requests: fonts, images and scripts are
-  self-hosted. Every page starts its head with the same Content-Security-Policy meta tag (`'self'`
-  only; a test checks it), so no inline `<script>` (JSON-LD data blocks excepted), no `<style>` and
-  no `style=""`.
+- Zero runtime dependencies and no third-party request but one: fonts, images and scripts are
+  self-hosted. The exception is Umami (`js/analytics.js`): on lonebee.games only, page views only,
+  no custom event (Umami holds a tracked link until its request ends), no cookie, nothing that
+  identifies anyone. It shares Draw my code's Umami website: the Hobby plan allows one, and each
+  site is told apart by its hostname.
+- Every page starts its head with the same Content-Security-Policy meta tag (`'self'`, plus
+  Umami's two hosts; a test checks it), so no inline `<script>` (JSON-LD data blocks excepted), no
+  `<style>` and no `style=""`.
 - Root-relative URLs (`/css/site.css`), never relative ones: GitHub Pages serves `404.html` at any
   missing path, so a relative URL would break there.
 - Progressive enhancement: every word and link works without JavaScript.
@@ -111,11 +116,16 @@ docs/PLAN.md     The plan.
 - Game names exactly: "Limpid Chess", "Draw my code", "Draw my code Kids", "Truth Table Game".
   Lead Limpid Chess with "smooth", as its own site does.
 - Every claim must stay true for every game, including future ones: no blanket "no ads", "free" or
-  "first on itch.io".
+  "first on itch.io". "No cookies" in the footer stays only as long as no cookie is set.
+- No emoji. A symbol that says it better than a word is a pixel glyph from `art/pieces/glyphs.js`
+  (`<img class="glyph">`, 2x), with alt text that reads as the word ("love", "France"). The tagline
+  is "I craft games with ♥"; the footer ends with "Crafted with ♥ in the Pyrenees", the owner's
+  mountains.
 
 ### Tooling
 
-- Node 22.12 or later, for tooling only. Dev dependencies are pinned to exact versions:
+- Node 24 LTS (or 22.22 and later), for tooling only; `.nvmrc` names it, so `nvm use` picks it.
+  Dev dependencies are pinned to exact versions:
   `@playwright/test`, `@axe-core/playwright`, `html-validate`. Anything else: ask me first, with
   the reason and the cost.
 - Plain JavaScript ES modules with `// @ts-check` and JSDoc types. No TypeScript build.

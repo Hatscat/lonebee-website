@@ -1,21 +1,25 @@
 // @ts-check
 /**
- * The hero scene: golden hour on a quiet heath. The brand's bee, the logo mark itself, hovers in
- * front of the glowing sky near a sun half set behind amber hills, at the top of the dotted path it
- * flew up from a lavender spike. One small tree on a far knoll gives the scale; a few tall grasses
- * and a thistle in the near meadow rise across the horizon, backlit; the rest is air.
+ * The hero scene: golden hour in a valley of the Ariège Pyrenees, under the Montcalm and the Pic
+ * d'Estats. The brand's bee, the logo mark itself, hovers in front of the glowing sky over that
+ * broad twin massif, near a sun half set in the col beyond it, at the top of the dotted path it
+ * flew up from a spike of ling, the heather of the summer pastures and of their honey. A lone
+ * mountain pine at the foot of the peak beyond the col gives the scale; a few tall grasses and a
+ * thistle in the near pasture rise across the foot of the mountains, backlit; the rest is air.
  *
  * The page puts its header, a bar of the same night, above the art, and its title, tagline and
  * buttons over columns 0 to 150 down to row 105, so the scene is composed to the right: the left
- * half is calm dusk sky over dark hills and a dark meadow, and everything bright (the glow, the
- * clouds, the stars that twinkle, the bee) lives in the right half. The first rows are bare night,
- * so the art continues the header without a seam; the last rows are the page background, so the
- * art melts into the page.
+ * half is calm dusk sky over dark forested slopes, a low dark ridge and a dark pasture, and
+ * everything bright (the glow, the clouds, the stars that twinkle, the bee, the lit summits and
+ * their snow) lives in the right half. The first rows are bare night, so the art continues the
+ * header without a seam; the last rows are the page background, so the art melts into the page.
  *
  * Everything is drawn in the 32 palette colors, shaded by ramps with hatched strata (rows of
  * dashes) between steps, and lit by one sun, low on the right: every illustrated edge that faces
- * it takes a warm rim, everything else falls into shade. The bee is mark() relit by that sun; the
- * rest is drawn by code from hand-placed shapes, with any randomness seeded.
+ * it takes a warm rim, everything else falls into shade. The ranges recede by value and warmth:
+ * the high range is seen through the evening air, cool and dark away from the sun and burning
+ * amber where the sun is behind it; the nearer the land, the darker and warmer. The bee is mark()
+ * relit by that sun; the rest is drawn by code from hand-placed shapes, with any randomness seeded.
  */
 import { contrast } from "../../scripts/tokens.js";
 import { Raster } from "../lib/raster.js";
@@ -31,7 +35,7 @@ const H = 150;
 /** @type {{ width: number, height: number, focus: [number, number] }} */
 export const SCENE = { width: W, height: H, focus: [0.8, 0.5] };
 
-/** The sun's center sits on the far crest, so half its disc shows. */
+/** The sun's center sits a row above the lowest point of the col, so about half its disc shows. */
 const SUN = { x: 254, y: 114, r: 9 };
 
 /** @param {number} v @param {number} lo @param {number} hi */
@@ -151,6 +155,14 @@ const BANDS = /** @type {[string, number][]} */ ([
   ["gold", 0.95],
   ["pollen", 1.3],
 ]);
+
+/** The sky band at a pixel, without its hatched edges. @param {number} x @param {number} y */
+function band(x, y) {
+  const b = glow(x, y);
+  let k = 0;
+  while (k + 1 < BANDS.length && b >= BANDS[k + 1][1]) k++;
+  return BANDS[k][0];
+}
 
 /** Half the depth of each band's hatched edge, in pixels across the edge. */
 const SOFT = [0, 4, 3, 3, 3, 2.5, 1.5];
@@ -378,7 +390,7 @@ function layer(r, top, { ramp, reach, depth, rims = [] }, dash) {
 }
 
 /**
- * Raises rounded bumps on a crest: gorse and heather bushes, so no ridge is a bare curve.
+ * Raises rounded bumps on a crest: a knoll, the crown of a beech.
  * @param {number[]} top
  * @param {[number, number, number][]} list [x, half-width, height]
  */
@@ -394,31 +406,101 @@ function bushes(top, list) {
   return top;
 }
 
-// The land, back to front, each crest drawn by hand: the far ridge the sun sets behind, with the
-// tree's knoll; a farther heather ridge; the mid hills, high and dark on the left; the near hills,
-// stepping down toward the light; and the meadow's edge.
-const FAR = crest([
-  [140, 112], [152, 110], [165, 109], [176, 108], [186, 108], [196, 110], [206, 110], [214, 112],
-  [226, 112], [236, 114], [246, 115], [260, 115], [268, 112], [274, 108], [280, 107], [288, 107],
-  [294, 110], [299, 111],
+/**
+ * A ridgeline straight between hand-placed vertices, so rock ridges and arêtes climb in even
+ * stairs: each segment holds its first row for a whole run before it steps, so a slope of one row
+ * in three is three, three, three, never two, three, one. Columns left of the first vertex are
+ * below the frame.
+ * @param {[number, number][]} points
+ * @returns {number[]} the top row of each column
+ */
+function ridge(points) {
+  return Array.from({ length: W }, (_, x) => {
+    if (x < points[0][0]) return H;
+    let k = 0;
+    while (k + 2 < points.length && points[k + 1][0] <= x) k++;
+    const [x0, y0] = points[k];
+    const [x1, y1] = points[k + 1];
+    return y0 + Math.trunc(((y1 - y0) * clamp(x - x0, 0, x1 - x0)) / (x1 - x0));
+  });
+}
+
+/**
+ * Raises a forest on a crest, seen from afar: fir spires, steep and pointed, among the rounder
+ * crowns of beeches, at random but even spacing.
+ * @param {number[]} top
+ * @param {number} from first column
+ * @param {number} to last column
+ * @param {number} seed
+ * @param {{ tall: [number, number], gap: [number, number], beech: number,
+ *   clearings?: [number, number][] }} look tall: fir heights; gap: columns between trees; beech:
+ *   the share of round crowns; clearings: [from, to] columns left bare, pastures in the forest
+ */
+function forest(top, from, to, seed, { tall, gap, beech, clearings = [] }) {
+  const g = rng(seed);
+  for (let x = from + g.int(0, gap[1]); x <= to; x += g.int(gap[0], gap[1])) {
+    if (clearings.some(([a, b]) => x >= a && x <= b)) continue;
+    const ground = top[x];
+    if (g.chance(beech)) {
+      bushes(top, [[x, 2, 1]]);
+      continue;
+    }
+    const h = g.int(tall[0], tall[1]);
+    // A spire two rows per column: a one-pixel tip, then three, then five.
+    for (let i = -2; i <= 2; i++) {
+      const c = x + i;
+      if (c >= 0 && c < W) top[c] = Math.min(top[c], ground - h + 2 * Math.abs(i));
+    }
+  }
+  return top;
+}
+
+// The land, back to front. The high range is hand-placed rock, straight between its vertices: a
+// low ridge rising out of the dusk on the left, kept low and flat under the link preview's
+// caption; the broad twin massif under the bee, the Montcalm and the higher Pic d'Estats, whose
+// east face falls in rock steps into the col the sun sets in; the col itself a shallow saddle,
+// lowest under the sun, so the disc sinks into a notch; a rocky peak beyond the col, its flank
+// stepped the same way. In front of it, low hills in the glow, then rounded shoulders under
+// forest, the left one high and dark like a side of the valley, both falling toward the sun, so
+// the valley opens on it; the near slope; the pasture.
+const FAR = ridge([
+  [98, 108], [113, 103], [119, 101], [124, 101], [126, 102], [131, 102], [135, 100], [139, 100],
+  [143, 99], [147, 99], [150, 100], [156, 97], [162, 94], [164, 92], [166, 91], [168, 90],
+  [170, 88], [171, 88], [173, 89], [176, 89], [178, 90], [180, 90], [182, 91], [186, 93], [189, 94],
+  // the Montcalm: a broad dome, its top at columns 213 to 217
+  [192, 93], [198, 90], [204, 88], [207, 87], [212, 87], [213, 86], [216, 86], [218, 87], [221, 88],
+  [223, 89], [224, 90], [225, 90],
+  // the Pic d'Estats: a sharp pyramid, right of the bee's head, its east flank in rock steps
+  [231, 84], [232, 84], [234, 88], [235, 91], [237, 92], [239, 96], [240, 99], [242, 100],
+  [244, 106], [246, 113],
+  // the col
+  [248, 114], [251, 115], [257, 115], [258, 114], [261, 113], [264, 112],
+  // the peak beyond
+  [268, 108], [270, 107], [275, 101], [278, 100], [283, 94], [285, 93], [289, 92], [293, 91],
+  [295, 91], [297, 92], [299, 93],
 ]);
-const FARMID = crest([
-  [118, 112], [132, 110], [144, 109], [156, 112], [168, 114], [182, 115], [196, 116], [205, 116],
-  [208, 118], [224, 119], [234, 119], [237, 121], [258, 122], [270, 120], [276, 117], [286, 117],
-  [299, 118],
-]);
-const MID = bushes(crest([
-  [0, 101], [10, 98], [24, 96], [36, 96], [48, 99], [60, 101], [72, 101], [80, 103], [96, 104],
-  [110, 107], [124, 108], [138, 111], [152, 113], [166, 116], [182, 117], [198, 118], [212, 119],
-  [215, 121], [230, 122], [243, 122], [246, 124], [262, 124], [268, 122], [274, 120], [290, 120],
-  [299, 122],
-]), [[17, 2, 1], [55, 3, 1], [66, 2, 1], [104, 3, 1], [145, 2, 1], [173, 3, 1], [208, 2, 1]]);
-const NEAR = bushes(
+const FOOT = forest(
+  crest([
+    [184, 119], [196, 116], [206, 115], [216, 116], [228, 118], [240, 120], [250, 122], [262, 122],
+    [272, 119], [284, 117], [299, 117],
+  ]),
+  186, 299, 13, { tall: [2, 3], gap: [5, 10], beech: 0.5 },
+);
+const MID = forest(
+  bushes(crest([
+    [0, 97], [14, 95], [30, 94], [46, 96], [62, 99], [80, 101], [100, 104], [120, 106], [140, 108],
+    [160, 111], [180, 113], [200, 116], [220, 119], [236, 121], [248, 124], [262, 124], [274, 120],
+    [286, 117], [299, 115],
+  ]), [[271, 5, 1]]),
+  0, 240, 5,
+  { tall: [2, 3], gap: [4, 9], beech: 0.4, clearings: [[34, 50], [96, 112], [168, 180]] },
+);
+const NEAR = forest(
   crest([
     [0, 106], [16, 104], [30, 106], [44, 109], [60, 112], [74, 113], [92, 117], [112, 119], [132, 120],
     [152, 122], [172, 124], [192, 125], [212, 127], [232, 128], [252, 129], [272, 128], [299, 126],
   ]),
-  [[9, 3, 2], [38, 4, 2], [44, 2, 1], [83, 3, 2], [121, 4, 2], [127, 2, 1], [186, 3, 1], [229, 3, 1]],
+  0, 140, 9, { tall: [3, 4], gap: [5, 11], beech: 0.3, clearings: [[52, 66], [104, 118]] },
 );
 const MEADOW = crest([
   [0, 123], [22, 122], [48, 125], [78, 128], [104, 128], [130, 131], [158, 133], [178, 132],
@@ -426,35 +508,248 @@ const MEADOW = crest([
 ]);
 
 /**
- * The lone tree on the far knoll, a heath oak in silhouette against the glow: a broad crown, wider
- * than it is tall, ragged on top, over a short trunk. It stands far enough left that phones, which
- * show columns 84 to 279, see most of its crown, and far enough from the sun to keep out of its halo.
+ * The twin massif is near enough to read its faces. From each summit a spur comes down toward us
+ * in a zigzag of buttresses: the face west of it is turned away from the sun, the face east of it
+ * takes the light that grazes in from behind the range, in the color of the glowing air in front
+ * of it. Away from the sun the massif is cool and dark, the Montcalm in wine and heather; near it,
+ * it burns, the Pic d'Estats in burnt comb and amber. A face lies between two lines down the
+ * massif, [x, y] corners, top first, and is filled from the crest down, so it always meets the
+ * ridgeline, whatever its steps.
  */
-const TREE = sprite(
-  `
-  .....aa.a..
-  ..aaaaaaaa.
-  .aaaaaaaaaa
-  aaaaaaaaaaa
-  .aaaaaaaaa.
-  ...a.aaa...
-  .....a.....
-  .....a.....
+const SPLITS = /** @type {Record<string, [number, number][]>} */ ({
+  // the Montcalm's west edge: its shoulder stands in front of the low ridge
+  west: [[192, 93], [186, 103], [180, 113], [174, 121]],
+  // the spur down from the Montcalm's top
+  montcalm: [[213, 88], [211, 91], [212, 94], [209, 98], [210, 102], [207, 107], [206, 121]],
+  // the foot of the Estats' west flank, down from the saddle
+  saddle: [[225, 90], [224, 96], [222, 104], [221, 121]],
+  // the spur down from the Estats' top: its snow is the east half of the summit
+  estats: [[231, 87], [230, 90], [231, 93], [228, 98], [229, 102], [226, 107], [225, 121]],
+  // the Estats' east foot, in the col
+  col: [[247, 113], [251, 121]],
+});
+
+/** The faces, west to east: [the line west of it, the line east of it, color]. */
+const FACES = /** @type {[string, string, string][]} */ ([
+  ["west", "montcalm", "wine"],
+  ["montcalm", "saddle", "heather"],
+  ["saddle", "estats", "burnt-comb"],
+  ["estats", "col", "amber"],
+]);
+
+/** The peak beyond the col: its east flank in shade, [corners], painted over the range. */
+const BEYOND = /** @type {[number, number][]} */ ([[295, 91], [297, 96], [300, 102], [300, 93], [297, 92]]);
+
+/**
+ * The column where a line down the massif crosses a row, held level beyond its ends.
+ * @param {[number, number][]} line
+ * @param {number} y
+ */
+function splitAt(line, y) {
+  if (y <= line[0][1]) return line[0][0];
+  for (let k = 0; k + 1 < line.length; k++) {
+    const [x0, y0] = line[k];
+    const [x1, y1] = line[k + 1];
+    if (y <= y1) return Math.round(x0 + ((x1 - x0) * (y - y0)) / (y1 - y0));
+  }
+  return line[line.length - 1][0];
+}
+
+/**
+ * The col and the peak beyond it stand right in the glow, seen through air the sun lights from
+ * behind: each of their pixels takes the color of the sky behind it, a step into shadow, with the
+ * sky's own strata, burning amber around the sun. Only there: the low ridge on the left stays a
+ * flat night silhouette, because the page's copy lies over it and because, shaded from the sky,
+ * it would dissolve into the slate strata (see the note on the two pieces at the end of this
+ * section).
+ */
+const SHADOW = /** @type {Record<string, string>} */ ({
+  sky: "slate", peach: "heather", honey: "amber", gold: "amber", pollen: "marmalade",
+  sunlight: "marmalade",
+});
+
+/**
+ * The haze that fills the valley under the range: toward the foot of the range, a growing share
+ * of each row's dashes lifts a step, cool far from the sun and lit near it. [lifted color, the
+ * row it starts from, rows until every dash is lifted]: it starts higher on the low ridge, so the
+ * far land stands in more air than the wine shoulders in front of it, and lies in front of both
+ * summits. The Montcalm's heather face has none: the next step up, lavender, is so much lighter
+ * that its few dashes there read as stray marks, or as a lake when there are more.
+ */
+const HAZE = /** @type {Record<string, [string, number, number]>} */ ({
+  night: ["dusk", 100, 10], wine: ["heather", 107, 14],
+  "burnt-comb": ["amber", 106, 10], amber: ["marmalade", 106, 10],
+});
+
+/**
+ * The rock of the twin massif, drawn by hand over its faces, so its marks vary in length, start
+ * and lean the way rock does, where lines from rules would fall into even stripes. Each mark is
+ * relative to the face under it ("." keeps the face): "d" a step darker, "l" a step brighter, "s"
+ * snow in shade, "p" snow in the sun. Snow lies high: a solid cap on each top, pollen where it
+ * takes the sun, and below it a few couloirs of shaded snow, inside the rock, never touching a
+ * crest or a rim. Lower down the faces are ridged with arêtes, a dark line with the light on its
+ * sunward side, fanning out from each summit, the outer ones leaning more, so the summits read
+ * as rock, not as a tent. Where the haze has lifted a dash, it hides the rock. [first column,
+ * first row, map]
+ */
+const ROCK = {
+  x: 189,
+  y: 84,
+  map: `
+  ..........................................pp....
+  ..........................................pp....
+  ........................pppp..............pp....
+  .....................pppppp.....................
+  ......................sss.......................
+  ....................s...................s.......
+  ...................s........s..........s........
+  ...................s.........s.........s........
+  ..................s..........s..................
+  ................................................
+  .................d............dl......dl........
+  ..........d......dl............d......dl....dl..
+  .........dl.....dl.............dl....d......dl..
+  ........dl......dl.............d.....d.......dl.
+  .......d........d...............d....d.......dl.
+  .......d.......d................d.............dl
+  ......d........d..............................d.
+  .....d.........................................d
+  ...............................................d
   `,
-  { a: C["burnt-comb"] },
+};
+const DARKER = /** @type {Record<string, string>} */ ({
+  heather: "wine", wine: "night", amber: "burnt-comb", "burnt-comb": "wine",
+});
+const LIGHTER = /** @type {Record<string, string>} */ ({
+  heather: "clover", wine: "heather", amber: "marmalade", "burnt-comb": "amber",
+});
+/** Snow in shade: cool on the cool Montcalm, the color of snow in shade at dusk; warm on the Estats. */
+const SHADED_SNOW = /** @type {Record<string, string>} */ ({
+  wine: "lavender", heather: "lavender", "burnt-comb": "peach", amber: "peach",
+});
+
+/** The rim a crest takes near the sun: a step brighter than the sky just above it. */
+const RIM_OVER = /** @type {Record<string, string>} */ ({
+  sky: "honey", peach: "gold", honey: "gold", gold: "pollen", pollen: "pollen", sunlight: "gold",
+});
+
+/** The snow on the peak beyond the col, as on the massif: a cap, a couloir. [x, y, color] */
+const SNOW = /** @type {[number, number, string][]} */ ([
+  [293, 91, "pollen"], [294, 91, "pollen"], [295, 91, "pollen"], [293, 92, "pollen"],
+  [294, 92, "pollen"], [293, 94, "peach"], [292, 95, "peach"],
+]);
+
+/**
+ * The lone tree, a mountain pine on a knoll under the peak beyond the col, dark against its
+ * burning face: a straight trunk showing between three tiers of tufts that stream on the side
+ * the wind blows to, as the stems lean, the tips that face the sun catching it. It is a small
+ * tree, outgrown by the firs: ten rows with its foot in the knoll, about eight showing, on a knoll
+ * nearer than the forests. It stands three columns clear of the disc, and far enough left that a
+ * phone 390 pixels wide, which shows columns 84 to 278, shows its whole crown; the narrowest
+ * phones (96 to 275) lose only the tips of its two lowest leeward tufts.
+ */
+const PINE = sprite(
+  `
+  .....aa.....
+  ....baaaa...
+  .....a......
+  ...baaaaa...
+  .....aaaaaa.
+  .....a......
+  .baaaaaaaa..
+  ....aaaaaaaa
+  .....a......
+  ....aaa.....
+  `,
+  { a: C.wine, b: C.gold },
 );
-const TREE_X = 272;
+const PINE_X = 266;
+
+/*
+ * The hero and the 404 (bits.js, lost()) show the same valley: the broad Montcalm on the left,
+ * the Pic d'Estats two rows higher on its right, the light just right of the Estats. The home page
+ * is the golden hour; the 404 is the blue hour after it, the same valley later in the evening,
+ * which is why its glow and crests fall to heather where the hero's burn amber. Both use one
+ * language: one-pixel rims on every sunward edge near the light, light couloirs high on the
+ * summits, arêtes lower down, carlines in silver bracts round a tawny heart (warm silver here,
+ * cool there). One difference is on purpose: the 404 shades its whole massif from the sky behind
+ * it, while the hero does so only near the sun and keeps its low left ridge a flat night
+ * silhouette, because the page's copy lies over it and, shaded from the sky, it dissolves into
+ * the slate strata. Don't "fix" one to match the other.
+ */
 
 /** @param {Raster} r */
 function paintLand(r) {
   const dash = dashes(23);
-  layer(r, FAR, { ramp: ["burnt-comb", "amber", "marmalade"], reach: 44, depth: 6, rims: [["honey", 20]] }, dash);
-  layer(r, FARMID, { ramp: ["wine", "heather", "clover"], reach: 50, depth: 4, rims: [["coral", 40]] }, dash);
+  // The high range: night west of the massif, far from the sun whatever the sky does; the sky in
+  // shadow from the col on; then the massif's faces and the peak beyond's shaded flank.
+  for (let x = 0; x < W; x++) {
+    for (let y = FAR[x]; y < H; y++) {
+      const sky = NAME_OF.get(r.get(x, y)) ?? "";
+      r.set(x, y, C[x < SUN.x - 12 ? "night" : SHADOW[sky] ?? "amber"]);
+    }
+  }
+  /** @type {(string | undefined)[]} the color of the face each pixel lies on */
+  const face = new Array(W * H);
+  for (let y = 0; y < H; y++) {
+    for (const [from, to, color] of FACES) {
+      const [west, east] = [splitAt(SPLITS[from], y), splitAt(SPLITS[to], y)];
+      for (let x = Math.max(0, west); x < Math.min(W, east); x++) if (y >= FAR[x]) face[y * W + x] = color;
+    }
+  }
+  const beyond = new Raster(W, H).polygon(BEYOND, C.night);
+  for (let x = 0; x < W; x++) {
+    for (let y = FAR[x]; y < H; y++) {
+      if (beyond.get(x, y)) face[y * W + x] = "burnt-comb";
+      const color = face[y * W + x];
+      if (color) r.set(x, y, C[color]);
+    }
+  }
+  // The valley haze: a growing share of each row's dashes lifts a step.
+  for (let x = 0; x < W; x++) {
+    for (let y = FAR[x] + 2; y < H; y++) {
+      const [lift, from = 0, span = 1] = HAZE[NAME_OF.get(r.get(x, y)) ?? ""] ?? [];
+      if (lift && dash[y * W + x] < (y - from) / span) r.set(x, y, C[lift]);
+    }
+  }
+  // A dash cut to one pixel by a face or by the crest is noise: give it to its neighbors.
+  for (let x = 1; x < W - 1; x++) {
+    for (let y = Math.max(FAR[x - 1], FAR[x], FAR[x + 1]) + 1; y < H; y++) {
+      const left = r.get(x - 1, y);
+      if (left === r.get(x + 1, y) && left !== r.get(x, y)) r.set(x, y, left);
+    }
+  }
+  // The rock, then the rims, then the snow over them.
+  /** @param {(ch: string) => boolean} which */
+  const drawRock = (which) => {
+    rows(ROCK.map).forEach((row, j) => {
+      [...row].forEach((ch, i) => {
+        const [x, y] = [ROCK.x + i, ROCK.y + j];
+        const on = face[y * W + x];
+        if (ch === "." || !on || !which(ch)) return;
+        if ((ch === "d" || ch === "l") && r.get(x, y) !== C[on]) return;
+        /** @type {Record<string, string>} */
+        const tone = { d: DARKER[on], l: LIGHTER[on], s: SHADED_SNOW[on], p: "pollen" };
+        r.set(x, y, C[tone[ch]]);
+      });
+    });
+  };
+  drawRock((ch) => ch === "d" || ch === "l");
+  // Near the sun, every crest pixel and the steps that fall toward it take a rim, a step brighter
+  // than the sky above: gold right under the disc.
+  for (let x = SUN.x - 40; x <= SUN.x + 40; x++) {
+    if (x < 0 || x >= W) continue;
+    const next = FAR[clamp(x + sunward(x), 0, W - 1)];
+    const rim = Math.abs(x - SUN.x) <= 9 ? "gold" : RIM_OVER[band(x, FAR[x] - 1)] ?? "honey";
+    for (let y = FAR[x]; y === FAR[x] || y < next; y++) r.set(x, y, C[rim]);
+  }
+  drawRock((ch) => ch === "s" || ch === "p");
+  for (const [x, y, color] of SNOW) r.set(x, y, C[color]);
+  layer(r, FOOT, { ramp: ["wine", "heather", "clover"], reach: 50, depth: 4, rims: [["coral", 40]] }, dash);
   layer(r, MID, { ramp: ["wine", "heather"], reach: 50, depth: 3, rims: [["clover", 36], ["heather", 95]] }, dash);
   layer(r, NEAR, { ramp: ["propolis", "bark", "umber"], reach: 50, depth: 3, rims: [["umber", 44], ["bark", 110]] }, dash);
   layer(r, MEADOW, { ramp: ["hive", "propolis"], reach: 40, depth: 3 }, dash);
-  const trunk = TREE_X + 5;
-  r.draw(TREE, TREE_X, FAR[trunk] - TREE.height);
+  r.draw(PINE, PINE_X, MID[PINE_X + 5] - PINE.height + 2);
 }
 
 // ---------------------------------------------------------------- meadow
@@ -483,7 +778,7 @@ function tuft(r, x, y, blades, { stem, tip, lit }) {
 
 /**
  * The rim along a backlit stem's sunward side, by height: dim in the meadow's shade, brighter up
- * the hills as the low light grazes it, gold in front of the far ridge. A rim is drawn only on
+ * the hills as the low light grazes it, gold in front of the mountains. A rim is drawn only on
  * grounds dark enough for it to show; against the glowing sky the stem stays a plain dark
  * silhouette, since a rim there would vanish into the glow.
  */
@@ -577,13 +872,14 @@ function part(r, name, [x, y]) {
 /**
  * The tall plants, left to right: [root x, root row, tip row, lean, head]. They all lean the same
  * way, with the breeze: a foxtail, a clump of three grasses, and a thistle by the sun. None
- * crosses the sun's disc, and none rises near the bee.
+ * crosses the sun's disc, none rises near the bee, and their heads stay under the summits, so the
+ * saddle and the Estats' upper face read clean.
  */
 const STEMS = /** @type {[number, number, number, number, keyof typeof PARTS][]} */ ([
-  [203, 142, 117, 2, "spike"],
-  [214, 143, 110, 1, "spike"],
-  [217, 143, 103, 5, "plume"],
-  [221, 142, 112, 6, "plume"],
+  [203, 142, 119, 2, "spike"],
+  [214, 143, 114, 1, "spike"],
+  [217, 143, 109, 5, "plume"],
+  [221, 142, 113, 6, "plume"],
   [235, 142, 111, 3, "thistle"],
 ]);
 
@@ -687,38 +983,51 @@ function blade(r, x, h, bend, rim) {
  */
 const FLOWER_LEGEND = {
   l: C.lavender, h: C.heather, w: C.wine, m: C.moss, g: C.grass, c: C.clover, u: C.coral, v: C.peach,
-  o: C["old-wax"], x: C.wax, y: C.beeswax, z: C.sunlight,
+  o: C["old-wax"], x: C.wax, s: C.slate, t: C.tawny, f: C.umber, n: C.honey,
 };
 const FLOWER = {
-  // Lavender: three spikes of whorled florets, warm light catching their sunward side.
-  lavender: sprite(
+  // Ling, the heather of the summer pastures and of their honey: spikes of tiny bells over a low
+  // woody tuft, warm light catching their sunward side. The bee rose from its middle spike.
+  ling: sprite(
     `
     ....l.....
     ...hl.....
     ...lv..l..
-    ...hl.hl..
-    .l.lv.lv..
-    hl.hl.hl..
-    lv..m.lv..
-    hl..m.hl..
-    .m..m..m..
-    .m..m..m..
-    ..m.m.m...
-    ..m.m.m...
-    ...mmm....
+    .l.hl.hl..
+    hl.lv.lv..
+    lv.hl.hl.l
+    hl.hv.lv.v
+    .h.wl.hw.h
+    .wmwhmwmw.
+    ..wmw.wm..
+    ..m.w.m...
+    ...mwm....
+    ....w.....
     `,
     FLOWER_LEGEND,
   ),
-  // A single lavender spike, farther off.
-  spike: sprite(
+  // A single sprig of ling, farther off.
+  sprig: sprite(
     `
     .l.
     hl.
     lv.
     hl.
+    .w.
     .m.
     .m.
-    .m.
+    `,
+    FLOWER_LEGEND,
+  ),
+  // Spring gentians, two trumpets of blue on the turf, their sunward side lit through, their
+  // other side in the cool shade.
+  gentian: sprite(
+    `
+    s.l....
+    sll.s.l
+    .s..sll
+    .m...s.
+    mmm.mmm
     `,
     FLOWER_LEGEND,
   ),
@@ -754,7 +1063,7 @@ const FLOWER = {
     `,
     FLOWER_LEGEND,
   ),
-  // Heather: a woody sprig hung with bells.
+  // Bell heather: a woody sprig hung with bells.
   heather: sprite(
     `
     ...c...
@@ -767,28 +1076,29 @@ const FLOWER = {
     `,
     FLOWER_LEGEND,
   ),
-  // A dandelion clock against the light: a sparse, ragged sphere of seeds with the hills showing
-  // through, brightest on the arc that faces the sun, its stem joining at the bottom. No hub.
-  dandelion: sprite(
+  // The carline thistle of the Pyrenees, stemless, flat on the turf: a star of papery bracts round
+  // a domed tawny heart, umber underneath, one honey pixel on top where the sun shines through it.
+  // The bracts are warm silver, old wax in the shade and wax on the sun side, their tips spaced a
+  // pixel apart all round, so they radiate rather than stand on legs, one tip lit peach toward the
+  // sun. Nothing in it is as bright as the sun's own colors: it is a flower in the shade, not a
+  // light.
+  carline: sprite(
     `
-    ....x.y..
-    .o..o..z.
-    x.......y
-    ...o..x..
-    o.......z
-    .x..o..y.
-    ...o.z...
-    ....m....
-    ....m....
-    ....m....
-    ....m....
-    ....m....
-    ...m.....
-    ...m.....
-    ...m.....
-    ...m.....
-    ...m.....
-    ...m.....
+    ..o.x..
+    o.otn.x
+    .oftxv.
+    ..o.x..
+    `,
+    FLOWER_LEGEND,
+  ),
+  // A carline nearer the eye, wider open.
+  bigCarline: sprite(
+    `
+    ...o.x...
+    .o.otnx.x
+    o.ofttxxv
+    .o.offx.x
+    ...o.x...
     `,
     FLOWER_LEGEND,
   ),
@@ -796,21 +1106,22 @@ const FLOWER = {
 
 /** Where the flowers grow, in patches: [sprite, x, rows below the meadow's edge]. Nearer ones sit lower. */
 const FLOWERS = /** @type {[keyof typeof FLOWER, number, number][]} */ ([
-  // the lavender patch the bee rose from
-  ["spike", 158, 1], ["spike", 175, 2], ["lavender", 167, 4], ["spike", 182, 3],
-  // clover and heather toward the light
-  ["clover", 205, 3], ["heather", 214, 2], ["clover", 226, 7], ["heather", 249, 2], ["clover", 259, 5],
+  // the ling the bee rose from, and gentians at its foot
+  ["sprig", 158, 1], ["sprig", 175, 2], ["ling", 167, 4], ["sprig", 182, 3], ["gentian", 189, 5],
+  // clover, bell heather and carlines toward the light
+  ["clover", 205, 3], ["heather", 214, 2], ["clover", 226, 7],
+  ["heather", 249, 2], ["clover", 259, 5], ["carline", 262, 8], ["gentian", 271, 4],
   // nearer, so larger
-  ["bigClover", 245, 10],
-  // the dandelion clock against the glow, and a last spike
-  ["dandelion", 276, 6], ["spike", 286, 1],
+  ["bigClover", 245, 10], ["bigCarline", 284, 11],
+  // a last sprig
+  ["sprig", 290, 1],
 ]);
 
-/** The lavender the bee rose from: the top of its middle spike, where the dotted path starts. */
+/** The ling the bee rose from: the top of its middle spike, where the dotted path starts. */
 const FROM = (() => {
-  const [, x, dy] = /** @type {[string, number, number]} */ (FLOWERS.find(([name]) => name === "lavender"));
+  const [, x, dy] = /** @type {[string, number, number]} */ (FLOWERS.find(([name]) => name === "ling"));
   const spike = 4; // the middle spike's column in the sprite
-  return { x: x - Math.floor(FLOWER.lavender.width / 2) + spike, y: MEADOW[x] + dy - FLOWER.lavender.height + 1 };
+  return { x: x - Math.floor(FLOWER.ling.width / 2) + spike, y: MEADOW[x] + dy - FLOWER.ling.height + 1 };
 })();
 
 /** @param {Raster} r */
@@ -824,9 +1135,9 @@ function paintFlowers(r) {
 // ---------------------------------------------------------------- the flight path
 
 /**
- * The way the bee came, as cubic Bézier segments [p0, p1, p2, p3]: a lazy S from the lavender it
- * left up to where it hovers now. It leaves the flower up and to the left, bows out over the dark
- * hills and the dusk, then sweeps up to the right and comes in level behind the bee's tail. Its
+ * The way the bee came, as cubic Bézier segments [p0, p1, p2, p3]: a lazy S from the ling it left
+ * up to where it hovers now. It leaves the flower up and to the left, bows out over the dark ridge
+ * and the dusk, then sweeps up to the right and comes in level behind the bee's tail. Its
  * lower bend stays left of the teal band of the glow, where the middle of the fade would vanish,
  * and right of column 150, where the page's copy sits.
  */
@@ -842,7 +1153,7 @@ function pathCurve() {
   ]);
 }
 
-/** The path fades by age, the oldest dot first: never burnt comb, which vanishes on the far ridge. */
+/** The path fades by age, the oldest dot first: never burnt comb, which vanishes on the dark slopes. */
 const PATH_FADE = ["amber", "marmalade", "honey", "gold"];
 
 /**

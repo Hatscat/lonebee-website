@@ -88,9 +88,12 @@ test("every font ships with its license", async () => {
   for (const font of fonts) expect(files, font).toContain(font.replace(/\.woff2$/, "-OFL.txt"));
 });
 
-/** The policy every page carries: nothing but the site's own files, no inline script or style. */
+/**
+ * The policy every page carries: the site's own files only, no inline script or style; and Umami's
+ * tracker and endpoint, the one exception (js/analytics.js).
+ */
 const CSP =
-  "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'";
+  "default-src 'none'; script-src 'self' https://cloud.umami.is; connect-src https://gateway.umami.is; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'";
 
 test("every page carries the Content-Security-Policy, before any resource", async () => {
   const pages = (await siteFiles()).filter((f) => f.endsWith(".html"));

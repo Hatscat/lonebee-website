@@ -16,6 +16,7 @@ import { Raster } from "./lib/raster.js";
 import { svgOf } from "./lib/svg.js";
 import { C, PALETTE } from "./palette.js";
 import { combCell, lost, nextKids, nextTruthTable, twinkle } from "./pieces/bits.js";
+import { flagFrance, heart, mountain } from "./pieces/glyphs.js";
 import { BEE, MOTION, SCENE, background, beeFrames } from "./pieces/hero.js";
 import { mark, markSmall } from "./pieces/mark.js";
 import { caption, wordmark } from "./pieces/wordmark.js";
@@ -122,7 +123,7 @@ function heroCrop(width, height, focus = SCENE.focus) {
 
 /**
  * The link preview, 1200×630 at 5x: the right 240 columns of the scene, its top night rows
- * cropped, with the wordmark and a caption on the calm sky. The scene's bee is the only bee: the
+ * cropped, with the wordmark and the tagline on the calm sky. The scene's bee is the only bee: the
  * mark beside it would make two.
  */
 function og() {
@@ -132,7 +133,11 @@ function og() {
   const x = 16;
   art.draw(wordmark(), x, 26);
   art.draw(caption("INDIE GAMES,", C.wax), x, 54);
-  art.draw(caption("ONE AT A TIME", C.wax), x, 64);
+  const line = caption("CRAFTED WITH", C.wax);
+  art.draw(line, x, 64);
+  // The heart sits on the caption's baseline, a letter space after the last word.
+  const glyph = heart();
+  art.draw(glyph, x + line.width + 3, 64 + line.height - glyph.height);
   return art;
 }
 
@@ -163,6 +168,10 @@ export function outputs() {
     { path: "site/img/ui/comb-full.svg", svg: combCell("full"), scale: 2 },
     { path: "site/img/ui/comb-half.svg", svg: combCell("half"), scale: 2 },
     { path: "site/img/ui/twinkle.svg", svg: twinkle(), scale: 4 },
+    // Glyphs inside text, at 2x: the tagline's heart, the footer's heart, flag and peak.
+    { path: "site/img/ui/heart.svg", svg: heart(), scale: 2 },
+    { path: "site/img/ui/flag-fr.svg", svg: flagFrance(), scale: 2 },
+    { path: "site/img/ui/mountain.svg", svg: mountain(), scale: 2 },
     // Site: icons. The 16px frame is drawn for its size, never downscaled.
     {
       path: "site/favicon.ico",

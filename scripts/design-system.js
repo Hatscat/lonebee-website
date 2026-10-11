@@ -29,6 +29,9 @@ const MEDIA = [
   "site/img/ui/comb-full.svg",
   "site/img/ui/comb-half.svg",
   "site/img/ui/twinkle.svg",
+  "site/img/ui/heart.svg",
+  "site/img/ui/flag-fr.svg",
+  "site/img/ui/mountain.svg",
   "site/img/games/limpid-chess.webp",
   "site/img/next/truth-table-game.png",
 ];
@@ -77,6 +80,9 @@ the word.`,
       "design/assets/ui/comb-half.svg",
       "design/assets/ui/comb-full.svg",
       "design/assets/ui/twinkle.svg",
+      "site/img/ui/heart.svg",
+      "site/img/ui/flag-fr.svg",
+      "site/img/ui/mountain.svg",
     ],
     note: `App and avatar icons, and the interface's pixel icons. Generated; use them as they are.
 
@@ -85,22 +91,26 @@ the word.`,
 - \`apple-touch-icon.png\`: 180×180, opaque (iOS rounds its corners).
 - \`avatar-400.png\`: for profiles: X, itch.io, Discord.
 - \`comb-empty.svg\`, \`comb-half.svg\`, \`comb-full.svg\`: comb cells; full for what is out, half for what is in the works.
-- \`twinkle.svg\`: a star of \`glint\`, \`mist\` and \`deep-teal\`, for following along.`,
+- \`twinkle.svg\`: a star of \`glint\`, \`mist\` and \`deep-teal\`, for following along.
+- \`heart.svg\`, \`flag-fr.svg\`, \`mountain.svg\`: glyphs that stand in a line of text where an
+  emoji would go, at 2x: "I craft games with ♥", "Crafted with ♥ in the Pyrenees". Their alt text
+  reads as the word ("love", "France"); the peak is decorative.`,
   },
   Art: {
     tile: "l",
     files: ["design/assets/hero-1500x750.png", "site/img/lost.png", "site/img/next/draw-my-code-kids.png", "site/img/next/truth-table-game.png"],
-    note: `The pixel art. The hero: a lone honeybee hovering over a heath at golden hour, its wings lit
-through by the low sun, 300×150 pixels (here at 5x). The 404 page's flower, whose bee has flown
-away. Teaser tiles of the games in the works, 160×84 (40:21, like the game cards). Drawn in code;
-every pixel is a palette color; scale by whole numbers only.`,
+    note: `The pixel art. The hero: a lone honeybee hovering over a valley of the Ariège Pyrenees at
+golden hour, under the Montcalm and the Pic d'Estats, its wings lit through by the low sun, 300×150
+pixels (here at 5x). The 404 page: the same valley at the blue hour, and a carline thistle whose
+bee has flown away. Teaser tiles of the games in the works, 160×84 (40:21, like the game cards).
+Drawn in code; every pixel is a palette color; scale by whole numbers only.`,
   },
   Social: {
     tile: "l",
     files: ["site/img/og.png", "design/assets/x-header-1500x500.png", "design/assets/itch-banner-960x240.png", "design/assets/discord-banner-960x540.png"],
     note: `Images for link previews and profile pages, cut from the hero art at whole-number scales.
 
-- \`og.png\`: the link preview (Open Graph, X), 1200×630: the scene with the wordmark and "INDIE GAMES, ONE AT A TIME".
+- \`og.png\`: the link preview (Open Graph, X), 1200×630: the scene with the wordmark and "INDIE GAMES, CRAFTED WITH ♥".
 - \`x-header-1500x500.png\`: X profile header (X may crop 60px at the top and bottom).
 - \`itch-banner-960x240.png\`: itch.io profile banner, in Fixed width.
 - \`discord-banner-960x540.png\`: Discord server banner: no text or logo, as Discord asks.`,

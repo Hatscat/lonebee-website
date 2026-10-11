@@ -2,7 +2,7 @@
 
 The website of Lone Bee, a one-person game studio: a landing page and games hub, hosted on GitHub
 Pages at https://lonebee.games/. Plain HTML, CSS and one small script, no framework, no build step,
-no tracking.
+only cookieless page counts (Umami).
 
 - Conventions for Claude Code and for humans: [CLAUDE.md](CLAUDE.md).
 - The plan, and the launch steps (DNS, GitHub Pages): [docs/PLAN.md](docs/PLAN.md).
@@ -11,7 +11,7 @@ no tracking.
 
 ## Setup
 
-Node.js 22.12 or later, then:
+Node.js 24 LTS (or 22.22 and later). With nvm, `nvm use` picks it from `.nvmrc`. Then:
 
 ```sh
 npm ci

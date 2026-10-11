@@ -35,7 +35,9 @@ Decisions (defaults; each is cheap to change):
 - [x] Games: Limpid Chess and Draw my code under "Games". Draw my code Kids and Truth Table Game
       under "In the works", plus one line for the Roblox game and the CrazyGames .io game. No
       launch dates.
-- [x] No analytics, so no cookie banner. Umami (as in Draw my code) can be added later.
+- [x] Analytics: Umami Cloud, the website Draw my code already uses (the Hobby plan allows one;
+      each site is told apart by its hostname). Page views only, loaded on lonebee.games only by
+      `site/js/analytics.js`. Cookieless, so no cookie banner.
 - [x] Dark only: the site is a night scene. The design system may add a light variant for print and
       documents.
 - [x] Brand direction: "Hive and amber", chosen from three explored in parallel (it won the art
@@ -191,7 +193,6 @@ the domain or its subdomains on GitHub Pages. Check that Settings → Pages list
   the same header and footer.
 - Press kit: logos, screenshots and fact sheet on one page, built from the design system's assets.
 - Devlog or news, if itch.io devlogs aren't enough.
-- Analytics: Umami, as in Draw my code, only if you need numbers.
 - The Draw my code itch.io page link on its card, once you confirm its address.
 
 ### Private game repositories

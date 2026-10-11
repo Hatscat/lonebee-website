@@ -12,7 +12,7 @@ buttons. The art moves like a game; the words stay put.
   </div>
   <div class="wrap hero-copy">
     <h1 id="hero-title" class="hero-title">Lone Bee</h1>
-    <p class="hero-tagline">I make small games, one at a time.</p>
+    <p class="hero-tagline">I craft games with <img class="glyph" src="/img/ui/heart.svg" width="14" height="12" alt="love"></p>
     <ul class="actions">
       <li><a class="button button-primary" href="#games">See the games</a></li>
       <li><a class="button" href="https://lone-bee.itch.io/">Follow on itch.io</a></li>
@@ -38,7 +38,8 @@ buttons. The art moves like a game; the words stay put.
   text and control pixel against the art under it at a dozen widths.
 - **Title** in `display-xl` (112px) with `shadow-title` from 720px wide, `display-l` (56px) with
   `shadow-title-small` below.
-  **Tagline** in `lead`, `text`. Buttons: see Button.
+  **Tagline** in `lead`, `text`: "I craft games with ♥", the heart a pixel glyph read aloud as
+  "love". Buttons: see Button.
 
 ## Tokens
 
