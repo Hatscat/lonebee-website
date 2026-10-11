@@ -1,0 +1,35 @@
+<!-- @dsCard group="Navigation" height=230 -->
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Header</title></head>
+<body class="page-home">
+<header class="site-header">
+  <div class="wrap header-bar">
+    <a class="brand" href="#home"><img src="../../media/logo.svg" width="258" height="64" alt="Lone Bee, home"></a>
+    <nav class="site-nav" aria-label="Site">
+      <ul>
+        <li><a href="#games">Games</a></li>
+        <li><a href="#follow" aria-current="page">Follow</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<p class="note">Under 480px wide: the mark alone</p>
+<div class="narrow page-home">
+  <div class="site-header">
+    <div class="header-bar">
+      <a class="brand" href="#home"><img src="../../media/mark.svg" width="64" height="64" alt="Lone Bee, home"></a>
+      <nav class="site-nav" aria-label="Site, narrow">
+        <ul><li><a href="#games">Games</a></li><li><a href="#follow">Follow</a></li></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+<style>
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/24px var(--font-body); }
+  .note { margin: 16px 32px 8px; font: 400 14px/20px var(--font-mono); color: var(--text-muted); }
+  .narrow { max-width: 360px; margin: 0 32px; }
+  .narrow .site-header { background: var(--sky-top); padding: 0 16px; }
+</style>
+</body>
+</html>

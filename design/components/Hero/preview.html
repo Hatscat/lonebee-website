@@ -1,0 +1,28 @@
+<!-- @dsCard group="Brand" height=480 width=1200 -->
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Hero</title></head>
+<body>
+<section class="hero preview-hero" aria-labelledby="hero-title">
+  <div class="hero-art">
+    <img src="../../media/hero.png" width="300" height="150" alt="">
+  </div>
+  <div class="wrap hero-copy">
+    <h1 id="hero-title" class="hero-title">Lone Bee</h1>
+    <p class="hero-tagline">I make small games, one at a time.</p>
+    <ul class="actions">
+      <li><a class="button button-primary" href="#games">See the games</a></li>
+      <li><a class="button on-art" href="#follow">Follow on itch.io</a></li>
+    </ul>
+  </div>
+</section>
+<style>
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/24px var(--font-body); }
+  .preview-hero { position: relative; height: 480px; }
+  .preview-hero .hero-art { position: absolute; inset: 0; height: auto; }
+  .preview-hero .hero-copy { padding-block: 48px; }
+  .preview-hero .hero-title { font: 400 112px/112px var(--font-display); text-shadow: var(--shadow-title); }
+  .button.on-art { box-shadow: var(--shadow-button-secondary-hover); }
+</style>
+</body>
+</html>

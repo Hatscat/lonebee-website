@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+    <title>Lone Bee · Indie games</title>
+    <meta name="description" content="Lone Bee is a one-person game studio. Play Limpid Chess and Draw my code, see what's coming next, and follow new games on itch.io.">
+    <link rel="canonical" href="https://lonebee.games/">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#1a1211">
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="preload" href="/fonts/jersey-10.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/atkinson-hyperlegible-next.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/site.css">
+    <script type="module" src="/js/hero.js"></script>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Lone Bee">
+    <meta property="og:title" content="Lone Bee">
+    <meta property="og:description" content="Small games, made one at a time by a solo developer: Limpid Chess, Draw my code, and more on the way.">
+    <meta property="og:url" content="https://lonebee.games/">
+    <meta property="og:image" content="https://lonebee.games/img/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Pixel art: a honeybee hovers over a meadow at sunset, beside the words Lone Bee, indie games, one at a time">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://lonebee.games/#organization",
+            "name": "Lone Bee",
+            "url": "https://lonebee.games/",
+            "logo": "https://lonebee.games/img/icons/maskable-512.png",
+            "email": "lone.bee.dev@gmail.com",
+            "sameAs": ["https://lone-bee.itch.io/", "https://github.com/Hatscat"]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://lonebee.games/#website",
+            "name": "Lone Bee",
+            "url": "https://lonebee.games/",
+            "publisher": { "@id": "https://lonebee.games/#organization" }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body class="page-home">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap header-bar">
+        <a class="brand" href="/">
+          <picture>
+            <source media="(max-width: 479px)" srcset="/img/mark.svg" width="64" height="64">
+            <img src="/img/logo.svg" width="258" height="64" alt="Lone Bee, home">
+          </picture>
+        </a>
+        <nav class="site-nav" aria-label="Site">
+          <ul>
+            <li><a href="#games">Games</a></li>
+            <li><a href="#follow">Follow</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-art" data-hero>
+          <img src="/img/hero.png" width="300" height="150" alt="" fetchpriority="high">
+        </div>
+        <div class="wrap hero-copy">
+          <h1 id="hero-title" class="hero-title">Lone Bee</h1>
+          <p class="hero-tagline">I make small games, one at a time.</p>
+          <ul class="actions">
+            <li><a class="button button-primary" href="#games">See the games</a></li>
+            <li><a class="button" href="https://lone-bee.itch.io/">Follow on itch.io</a></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" id="games" aria-labelledby="games-title">
+        <div class="wrap">
+          <h2 id="games-title" class="section-title"><img src="/img/ui/comb-full.svg" width="20" height="22" alt="">Games</h2>
+          <ul class="cards">
+            <li>
+              <article class="card" aria-labelledby="limpid-chess">
+                <img class="card-image" src="/img/games/limpid-chess.webp" width="952" height="500" alt="Three moves drawn as arrows on a chess board, then the answer, with the best move checked in green" loading="lazy">
+                <div class="card-body">
+                  <h3 class="card-title" id="limpid-chess"><a href="https://limpidchess.lonebee.games/">Limpid Chess</a></h3>
+                  <p class="card-text">A smooth chess game where every turn shows three moves: find the best one.</p>
+                  <ul class="tags">
+                    <li>Android</li>
+                    <li>Web</li>
+                  </ul>
+                  <ul class="actions">
+                    <li><a class="button button-primary" href="https://limpidchess.lonebee.games/play/">Play in the browser</a></li>
+                    <li><a class="button" href="https://play.google.com/store/apps/details?id=game.limpidchess">Get it on Google Play</a></li>
+                  </ul>
+                </div>
+              </article>
+            </li>
+            <li>
+              <article class="card" aria-labelledby="draw-my-code">
+                <img class="card-image" src="/img/games/draw-my-code.webp" width="1200" height="630" alt="The title Draw my code and the line int f(int x, int y), beside a red disc painted on an 8×8 grid" loading="lazy">
+                <div class="card-body">
+                  <h3 class="card-title" id="draw-my-code"><a href="https://drawmycode.lonebee.games/">Draw my code</a></h3>
+                  <p class="card-text">A daily puzzle: read a tiny C function, paint its output on an 8×8 grid.</p>
+                  <ul class="tags">
+                    <li>Web</li>
+                  </ul>
+                  <ul class="actions">
+                    <li><a class="button button-primary" href="https://drawmycode.lonebee.games/">Play today's puzzle</a></li>
+                  </ul>
+                </div>
+              </article>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" id="in-the-works" aria-labelledby="in-the-works-title">
+        <div class="wrap">
+          <h2 id="in-the-works-title" class="section-title"><img src="/img/ui/comb-half.svg" width="20" height="22" alt="">In the works</h2>
+          <ul class="cards cards-next">
+            <li>
+              <article class="card card-next" aria-labelledby="draw-my-code-kids">
+                <img class="card-image" src="/img/next/draw-my-code-kids.png" width="160" height="84" alt="" loading="lazy">
+                <div class="card-body">
+                  <h3 class="card-title" id="draw-my-code-kids">Draw my code Kids</h3>
+                  <p class="card-text">Draw my code, made for young coders.</p>
+                  <ul class="tags">
+                    <li>Mobile</li>
+                  </ul>
+                </div>
+              </article>
+            </li>
+            <li>
+              <article class="card card-next" aria-labelledby="truth-table-game">
+                <img class="card-image" src="/img/next/truth-table-game.png" width="160" height="84" alt="" loading="lazy">
+                <div class="card-body">
+                  <h3 class="card-title" id="truth-table-game">Truth Table Game</h3>
+                  <p class="card-text">A programming game built on truth tables.</p>
+                  <ul class="tags">
+                    <li>Web</li>
+                    <li>Mobile</li>
+                  </ul>
+                </div>
+              </article>
+            </li>
+          </ul>
+          <p class="section-note">Also in the hive: a Roblox game and an .io game for CrazyGames.</p>
+        </div>
+      </section>
+
+      <section class="section follow" id="follow" aria-labelledby="follow-title">
+        <div class="wrap">
+          <h2 id="follow-title" class="section-title"><img src="/img/ui/twinkle.svg" width="20" height="20" alt="">Follow</h2>
+          <p class="section-lead">Follow along on itch.io to hear about new games.</p>
+          <ul class="actions">
+            <li><a class="button button-primary" href="https://lone-bee.itch.io/">Follow on itch.io</a></li>
+          </ul>
+          <ul class="links">
+            <li><a href="https://github.com/Hatscat">GitHub</a></li>
+            <li><a href="mailto:lone.bee.dev@gmail.com">lone.bee.dev@gmail.com</a></li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-bar">
+        <img src="/img/logo-small.svg" width="125" height="32" alt="">
+        <p>© Lone Bee · No cookies, no tracking.</p>
+      </div>
+    </footer>
+  </body>
+</html>

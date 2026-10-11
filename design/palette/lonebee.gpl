@@ -1,0 +1,36 @@
+GIMP Palette
+Name: Lone Bee
+Columns: 7
+#
+ 12   8  11	comb-black
+ 26  18  17	hive
+ 42  29  25	propolis
+ 66  45  36	bark
+ 99  68  48	umber
+143 105  67	tawny
+110  40  21	burnt-comb
+173  69  26	amber
+221 111  32	marmalade
+243 156  46	honey
+250 197  74	gold
+253 230 142	pollen
+156 134 112	old-wax
+201 178 142	wax
+243 230 198	beeswax
+255 250 234	sunlight
+ 17  21  40	night
+ 27  40  68	dusk
+ 42  68  98	slate
+ 60 107 124	deep-teal
+ 92 157 159	sky
+143 205 192	mist
+201 238 220	glint
+ 39  57  31	moss
+ 75 101  40	grass
+140 158  58	sunlit-grass
+ 61  24  48	wine
+119  41  74	heather
+154 133 200	lavender
+187  64  80	clover
+236 117  96	coral
+247 176 138	peach

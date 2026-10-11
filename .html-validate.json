@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "html-validate:recommended"
+  ],
+  "rules": {
+    "heading-level": "error",
+    "require-sri": [
+      "error",
+      {
+        "target": "crossorigin"
+      }
+    ],
+    "no-style-tag": "error"
+  }
+}

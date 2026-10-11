@@ -1,0 +1,612 @@
+/*
+ * Lone Bee: every style of the site. Values come from tokens.css only (see design/README.md);
+ * tests/css.node.spec.js fails on a raw color anywhere, or a raw length outside a media query.
+ *
+ * Breakpoints: 480px (card titles grow), 600px (wider gutter), 720px (hero title grows),
+ * 900px (two columns of cards), 1100px (the hero copy moves onto the art).
+ */
+
+/* Base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font: var(--type-body);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+h1,
+h2,
+h3,
+p,
+ul {
+  margin: 0;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: var(--link);
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--pixel);
+  text-underline-offset: var(--space-1);
+}
+
+a:hover {
+  color: var(--link-hover);
+}
+
+:focus-visible {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+
+.pixelated {
+  image-rendering: pixelated;
+}
+
+/* Layout */
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--content-max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter-narrow);
+}
+
+@media (min-width: 600px) {
+  .wrap {
+    padding-inline: var(--gutter);
+  }
+}
+
+/* Skip link: off screen until focused. */
+
+.skip-link {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: var(--layer-skip);
+  padding: var(--space-3) var(--space-6);
+  background: var(--accent);
+  color: var(--on-accent);
+  font: var(--type-label);
+  text-decoration: none;
+  box-shadow: var(--shadow-button-pressed);
+  transform: translateY(calc(-100% - var(--space-12)));
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.skip-link:hover {
+  color: var(--on-accent);
+}
+
+/* Header: on the home page, a bar of the same night as the top of the hero art, so the sky runs
+   on behind the logo; elsewhere, the page background. */
+
+.site-header {
+  position: relative;
+  z-index: var(--layer-content);
+}
+
+.page-home .site-header {
+  background: var(--sky-top);
+}
+
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-4);
+}
+
+.brand {
+  display: block;
+  flex: none;
+}
+
+.brand img {
+  image-rendering: pixelated;
+}
+
+.site-nav ul {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.site-nav a {
+  display: block;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  color: var(--text);
+  font: var(--type-label);
+  text-decoration: none;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  color: var(--accent);
+  text-decoration-line: underline;
+}
+
+/* Buttons: a fill grown by a notched one-pixel frame, over a notched hard drop. Pressed, a
+   button travels onto its own drop. */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-6);
+  background: var(--surface);
+  color: var(--text);
+  font: var(--type-label);
+  text-decoration: none;
+  box-shadow: var(--shadow-button-secondary);
+}
+
+.button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  box-shadow: var(--shadow-button-secondary-hover);
+}
+
+.button:active {
+  transform: translate(var(--drop), var(--drop));
+  box-shadow: var(--shadow-button-secondary-pressed);
+}
+
+.button:focus-visible {
+  outline-offset: var(--focus-offset-button);
+}
+
+.button-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-button);
+}
+
+.button-primary:hover {
+  background: var(--accent-hover);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.button-primary:active {
+  box-shadow: var(--shadow-button-pressed);
+}
+
+/* Disabled: still focusable (aria-disabled), so it keeps its focus ring; no drop, no hover. */
+.button[aria-disabled="true"],
+.button[aria-disabled="true"]:hover,
+.button[aria-disabled="true"]:active {
+  background: var(--surface);
+  color: var(--text-faint);
+  box-shadow: var(--shadow-frame);
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* Hero: the art, then the copy. From 1100px wide, the copy sits on the art's calm left sky. */
+
+.hero {
+  position: relative;
+}
+
+.hero-art {
+  position: relative;
+  z-index: var(--layer-art);
+  height: clamp(var(--hero-min), var(--hero-fluid), var(--hero-max));
+  overflow: hidden;
+  background: var(--hero-sky);
+}
+
+.hero-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 80% 50%;
+  image-rendering: pixelated;
+}
+
+/* hero.js sizes both layers in whole device pixels per art pixel. */
+.hero-art.is-snapped img,
+.hero-art canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  object-fit: fill;
+  image-rendering: pixelated;
+}
+
+.hero-art canvas[hidden] {
+  display: none;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: var(--layer-content);
+  padding-block: var(--space-8);
+}
+
+.hero-title {
+  color: var(--text);
+  font: var(--type-display-l);
+  text-shadow: var(--shadow-title-small);
+}
+
+.hero-tagline {
+  max-width: var(--measure);
+  margin-top: var(--space-4);
+  color: var(--text);
+  font: var(--type-lead);
+}
+
+.hero .actions {
+  margin-top: var(--space-8);
+}
+
+@media (min-width: 720px) {
+  .hero-title {
+    font: var(--type-display-xl);
+    text-shadow: var(--shadow-title);
+  }
+}
+
+@media (min-width: 1100px) {
+  .hero {
+    height: clamp(var(--hero-wide-min), var(--hero-wide-fluid), var(--hero-max));
+  }
+
+  .hero-art {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+
+  .hero-copy {
+    padding-block: var(--space-12);
+  }
+
+  /* On the art's sky, a secondary button needs a light frame to stand out. */
+  .hero .button:not(.button-primary) {
+    background: var(--surface);
+    box-shadow: var(--shadow-button-secondary-hover);
+  }
+
+  .hero .button:not(.button-primary):hover {
+    background: var(--surface-hover);
+  }
+
+  .hero .button:not(.button-primary):active {
+    box-shadow: var(--shadow-button-secondary-pressed);
+  }
+}
+
+/* Sections */
+
+.section {
+  padding-top: var(--space-16);
+}
+
+@media (min-width: 720px) {
+  .section {
+    padding-top: var(--space-24);
+  }
+}
+
+/* The hero art ends in a band of dark meadow, which already parts it from the first section. */
+@media (min-width: 1100px) {
+  .hero + .section {
+    padding-top: var(--space-12);
+  }
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--text);
+  font: var(--type-display-l);
+  text-shadow: var(--shadow-title-small);
+}
+
+.section-title img {
+  flex: none;
+  image-rendering: pixelated;
+}
+
+.section-lead {
+  max-width: var(--measure);
+  margin-top: var(--space-4);
+  color: var(--text-muted);
+  font: var(--type-lead);
+}
+
+.section-note {
+  max-width: var(--measure);
+  margin-top: var(--space-8);
+  color: var(--text-muted);
+}
+
+/* Cards: a surface in a notched frame. Games in the works get a dotted frame instead. */
+
+.cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+}
+
+@media (min-width: 900px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.cards > li {
+  display: flex;
+}
+
+.card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface);
+  box-shadow: var(--shadow-frame);
+}
+
+.card-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 40 / 21;
+  object-fit: cover;
+  background: var(--sunken);
+}
+
+.card-next .card-image {
+  image-rendering: pixelated;
+}
+
+.card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+@media (min-width: 480px) {
+  .card-body {
+    padding: var(--space-6);
+  }
+}
+
+.card-title {
+  color: var(--text);
+  font: var(--type-display-m);
+}
+
+@media (min-width: 480px) {
+  .card-title {
+    font: var(--type-display-l);
+  }
+}
+
+/* Inline padding grows the tap target to tap-min without moving anything around it. */
+.card-title a {
+  padding-block: var(--space-2);
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-title a:hover {
+  color: var(--accent);
+}
+
+.card-text {
+  color: var(--text-muted);
+}
+
+.card .actions {
+  margin-top: auto;
+  padding-top: var(--space-2);
+}
+
+.card-next {
+  position: relative;
+  box-shadow: none;
+}
+
+/* Dots of one UI pixel, two pixels apart, drawn with hard stops: no curve, no blur. */
+.card-next::before {
+  position: absolute;
+  inset: calc(-1 * var(--pixel));
+  content: "";
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, var(--border-strong) 0 var(--pixel), transparent var(--pixel) var(--drop)) top / 100% var(--pixel) no-repeat,
+    repeating-linear-gradient(90deg, var(--border-strong) 0 var(--pixel), transparent var(--pixel) var(--drop)) bottom / 100% var(--pixel) no-repeat,
+    repeating-linear-gradient(180deg, var(--border-strong) 0 var(--pixel), transparent var(--pixel) var(--drop)) left / var(--pixel) 100% no-repeat,
+    repeating-linear-gradient(180deg, var(--border-strong) 0 var(--pixel), transparent var(--pixel) var(--drop)) right / var(--pixel) 100% no-repeat;
+}
+
+/* Platform tags: comb cells, stretched, with stepped ends. */
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tags li {
+  padding: var(--space-1) var(--space-4);
+  background: var(--surface-hover);
+  color: var(--text);
+  font: var(--type-tag);
+  clip-path: polygon(
+    var(--drop) 0,
+    calc(100% - var(--drop)) 0,
+    calc(100% - var(--pixel)) var(--drop),
+    100% var(--drop),
+    100% calc(100% - var(--drop)),
+    calc(100% - var(--pixel)) calc(100% - var(--drop)),
+    calc(100% - var(--drop)) 100%,
+    var(--drop) 100%,
+    var(--pixel) calc(100% - var(--drop)),
+    0 calc(100% - var(--drop)),
+    0 var(--drop),
+    var(--pixel) var(--drop)
+  );
+}
+
+/* Follow */
+
+.follow .actions {
+  margin-top: var(--space-6);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.links a {
+  display: inline-block;
+  min-height: var(--tap-min);
+  padding-block: var(--space-2);
+  font: var(--type-label);
+}
+
+/* Footer */
+
+.site-footer {
+  margin-top: var(--space-16);
+  padding-block: var(--space-8);
+  background: var(--sunken);
+  color: var(--text-muted);
+  font: var(--type-small);
+}
+
+.footer-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-6);
+}
+
+@media (min-width: 720px) {
+  .site-footer {
+    margin-top: var(--space-24);
+  }
+}
+
+.footer-bar img {
+  image-rendering: pixelated;
+}
+
+/* 404 */
+
+.lost-body {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-6);
+  padding-block: var(--space-16) var(--space-24);
+}
+
+.lost-art {
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.lost-title {
+  color: var(--text);
+  font: var(--type-display-l);
+  text-shadow: var(--shadow-title-small);
+}
+
+/* Windows high contrast: the pixel frames are shadows, which this mode removes. Real borders
+   take their place. */
+
+@media (forced-colors: active) {
+  .button,
+  .card,
+  .skip-link {
+    border: var(--pixel) solid ButtonText;
+  }
+
+  .card-next {
+    border-style: dashed;
+  }
+
+  .card-next::before {
+    display: none;
+  }
+
+  .tags li {
+    clip-path: none;
+    border: var(--pixel) solid CanvasText;
+  }
+
+  /* The logos are images in their own colors: keep their night ground under any theme. */
+  .brand,
+  .footer-bar img {
+    forced-color-adjust: none;
+    background: var(--sky-top);
+  }
+}
+
+/* A light contrast theme would draw focus rings dark on the art's dark sky: in this mode the copy
+   leaves the art and follows it, as on narrow screens. */
+@media (forced-colors: active) and (min-width: 1100px) {
+  .hero {
+    height: auto;
+  }
+
+  .hero-art {
+    position: relative;
+    inset: auto;
+    height: clamp(var(--hero-wide-min), var(--hero-wide-fluid), var(--hero-max));
+  }
+}

@@ -1,0 +1,35 @@
+<!-- @dsCard group="Actions" height=360 -->
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Button</title></head>
+<body>
+<div class="sheet">
+  <p class="note">.button.button-primary · .button</p>
+  <ul class="actions">
+    <li><a class="button button-primary" href="#play">Play in the browser</a></li>
+    <li><a class="button" href="#store">Get it on Google Play</a></li>
+  </ul>
+
+  <p class="note">Disabled: aria-disabled="true"</p>
+  <ul class="actions">
+    <li><button type="button" class="button button-primary" aria-disabled="true">Play today's puzzle</button></li>
+  </ul>
+
+  <p class="note">On the hero art: the secondary frame starts beeswax</p>
+  <div class="hero sky">
+    <ul class="actions">
+      <li><a class="button button-primary" href="#games">See the games</a></li>
+      <li><a class="button on-art" href="#follow">Follow on itch.io</a></li>
+    </ul>
+  </div>
+</div>
+<style>
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/24px var(--font-body); }
+  .sheet { padding: 24px 32px 40px; display: grid; gap: 12px; }
+  .note { margin: 12px 0 0; font: 400 14px/20px var(--font-mono); color: var(--text-muted); }
+  .sky { background: var(--hero-sky); padding: 24px; }
+  .button.on-art { box-shadow: var(--shadow-button-secondary-hover); }
+  button.button { border: 0; cursor: pointer; }
+</style>
+</body>
+</html>

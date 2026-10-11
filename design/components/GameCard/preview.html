@@ -1,0 +1,40 @@
+<!-- @dsCard group="Content" height=620 -->
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>GameCard</title></head>
+<body>
+<div class="sheet">
+  <ul class="cards">
+    <li>
+      <article class="card" aria-labelledby="limpid">
+        <img class="card-image" src="../../media/limpid-chess.webp" width="952" height="500" alt="Three moves drawn as arrows on a chess board, then the answer, with the best move checked in green">
+        <div class="card-body">
+          <h3 class="card-title" id="limpid"><a href="#limpid-chess">Limpid Chess</a></h3>
+          <p class="card-text">A smooth chess game where every turn shows three moves: find the best one.</p>
+          <ul class="tags"><li>Android</li><li>Web</li></ul>
+          <ul class="actions">
+            <li><a class="button button-primary" href="#play">Play in the browser</a></li>
+            <li><a class="button" href="#store">Get it on Google Play</a></li>
+          </ul>
+        </div>
+      </article>
+    </li>
+    <li>
+      <article class="card card-next" aria-labelledby="truth">
+        <img class="card-image" src="../../media/truth-table-game.png" width="160" height="84" alt="">
+        <div class="card-body">
+          <h3 class="card-title" id="truth">Truth Table Game</h3>
+          <p class="card-text">A programming game built on truth tables.</p>
+          <ul class="tags"><li>Web</li><li>Mobile</li></ul>
+        </div>
+      </article>
+    </li>
+  </ul>
+</div>
+<style>
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/24px var(--font-body); }
+  .sheet { padding: 8px 32px 40px; }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+</style>
+</body>
+</html>

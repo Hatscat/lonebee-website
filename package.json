@@ -1,0 +1,23 @@
+{
+  "name": "lonebee-website",
+  "private": true,
+  "description": "lonebee.games: the Lone Bee games hub",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "serve": "node scripts/serve.js",
+    "generate": "node scripts/tokens.js && node art/build.js",
+    "lint": "node scripts/tokens.js --check && node art/build.js --check && html-validate \"site/**/*.html\"",
+    "test": "playwright test",
+    "check": "npm run lint && npm test",
+    "shots": "SHOTS=1 playwright test --project=shots"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "html-validate": "10.9.0"
+  }
+}
