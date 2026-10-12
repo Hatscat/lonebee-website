@@ -32,12 +32,16 @@ Decisions (defaults; each is cheap to change):
 - [x] Hosting: GitHub Pages, deployed by a GitHub Actions workflow gated on the full test suite.
       Suggested repository: `Hatscat/lonebee-website`, public.
 - [x] Identity: the brand "Lone Bee" only, no personal name, like the game sites.
-- [x] Games: Limpid Chess and Draw my code under "Games". Draw my code Kids and Truth Table Game
+- [x] Games: Limpid Chess and Draw my code under "Games". Draw my code Junior and Truth Table Game
       under "In the works", plus one line for the Roblox game and the CrazyGames .io game. No
       launch dates.
 - [x] Analytics: Umami Cloud, the website Draw my code already uses (the Hobby plan allows one;
       each site is told apart by its hostname). Page views only, loaded on lonebee.games only by
       `site/js/analytics.js`. Cookieless, so no cookie banner.
+- [x] Hero crop: the art is pinned to the bottom right of its box, so crops come off its top and
+      left, never the meadow or the light (the owner's call). From 1100px the hero grows up to the
+      first screen, and never gets so short that a very wide screen crops the bee. A click on the
+      art plays the flight again; Replay, a button shown on keyboard focus only, does the same.
 - [x] Dark only: the site is a night scene. The design system may add a light variant for print and
       documents.
 - [x] Brand direction: "Hive and amber", chosen from three explored in parallel (it won the art

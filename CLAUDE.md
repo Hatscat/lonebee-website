@@ -37,7 +37,7 @@ site/            Deployed as is to GitHub Pages. No build step.
   index.html, 404.html
   css/tokens.css   Generated from design/tokens.json.
   css/site.css     Every style of the site, written with tokens only.
-  js/hero.js       Sizes the hero art to whole device pixels and animates it. The page works without it.
+  js/hero.js       Pins the hero art to whole device pixels, animates it, replays it on a click. The page works without it.
   js/flight.js     The bee's flight path, shared with art/build.js so both draw the same frames.
   js/hero-data.js  Generated: the hero's size, layers and motion.
   js/analytics.js  Adds Umami's tracker on lonebee.games only (the website Draw my code shares).
@@ -78,8 +78,10 @@ docs/PLAN.md     The plan.
 - Accessibility is WCAG 2.2 AA: axe reports nothing, every control works with the keyboard, focus
   is always visible (high-contrast modes included), every tap target is `tap-min` tall, text
   contrast follows the notes in `design/tokens.json`.
-- Motion that starts by itself stops within five seconds: the hero plays one loop, then rests.
-  `prefers-reduced-motion` stops it from the start. No CSS transitions or animations.
+- Motion that starts by itself stops within five seconds: the hero plays one loop, then rests. A
+  click on the art, or Replay (a button for the keyboard, out of sight until focused), plays one
+  more: six seconds at most, never stacked. `prefers-reduced-motion` stops it from the start and
+  removes Replay. No CSS transitions or animations.
 - Images carry `width`, `height` and `alt` (empty when decorative). Below the fold:
   `loading="lazy"`.
 - External links are plain `<a href="https://…">`, opening in the same tab.
@@ -106,14 +108,17 @@ docs/PLAN.md     The plan.
   and ordered dithering.
 - Scale by whole numbers only (nearest neighbor). On the page, use `image-rendering: pixelated`.
 - The hero art keeps its contract with the page (`tests/hero-art.node.spec.js`): only dark colors
-  under the hero copy (columns 0 to 150, rows 0 to 105), its last 6 rows in `hive`, one flight loop
-  of five seconds at most, no pixel flashing more than three times a second.
+  under the hero copy (columns 0 to 150, rows 0 to 105), night alone in its first `SCENE.night`
+  rows, its last 6 rows in `hive`, one flight loop of five seconds at most that repeats exactly,
+  no pixel flashing more than three times a second. The page pins it to the bottom right of its box
+  (`tests/layout.spec.js`): crops come off its top and left, never its bottom or right, and never
+  reach the bee.
 
 ### Copy
 
 - English, US spelling. Short, plain sentences in the first person ("I make…"); no hype words.
   Sentence case for headings, buttons and links.
-- Game names exactly: "Limpid Chess", "Draw my code", "Draw my code Kids", "Truth Table Game".
+- Game names exactly: "Limpid Chess", "Draw my code", "Draw my code Junior", "Truth Table Game".
   Lead Limpid Chess with "smooth", as its own site does.
 - Every claim must stay true for every game, including future ones: no blanket "no ads", "free" or
   "first on itch.io". "No cookies" in the footer stays only as long as no cookie is set.

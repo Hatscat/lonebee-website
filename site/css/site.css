@@ -242,19 +242,24 @@ a:hover {
   position: relative;
 }
 
+/* The art is pinned to its box's bottom right corner (by hero.js, or object-position without it): a
+   box of another shape crops the art's left or top, never its meadow or its light. The box is the
+   night of the art's top rows, so a band hero.js leaves above the art reads as more sky. A click or
+   a tap on the art replays it (hero.js): no tap highlight veils it. */
 .hero-art {
   position: relative;
   z-index: var(--layer-art);
   height: clamp(var(--hero-min), var(--hero-fluid), var(--hero-max));
   overflow: hidden;
-  background: var(--hero-sky);
+  background: var(--sky-top);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .hero-art img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 80% 50%;
+  object-position: 100% 100%;
   image-rendering: pixelated;
 }
 
@@ -296,6 +301,35 @@ a:hover {
   margin-top: var(--space-8);
 }
 
+/* Replay, for the keyboard (a click on the art replays it too): hero.js adds this button after the
+   copy. Like the skip link, it stays out of sight until it has keyboard focus, then shows in line
+   with the copy: under its buttons while the copy follows the art (on the page, never on the
+   art's stars and flowers), on the art's dark meadow once the copy lies on it. Under reduced
+   motion there is nothing to replay. */
+.hero-replay {
+  position: absolute;
+  top: 100%;
+  left: var(--gutter-narrow);
+  z-index: var(--layer-content);
+}
+
+.hero-replay:not(:focus-visible) {
+  clip-path: inset(50%);
+  pointer-events: none;
+}
+
+@media (min-width: 600px) {
+  .hero-replay {
+    left: max(var(--gutter), (100% - var(--content-max)) / 2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-replay {
+    display: none;
+  }
+}
+
 @media (min-width: 720px) {
   .hero-title {
     font: var(--type-display-xl);
@@ -304,14 +338,30 @@ a:hover {
 }
 
 @media (min-width: 1100px) {
-  .hero {
-    height: clamp(var(--hero-wide-min), var(--hero-wide-fluid), var(--hero-max));
+  /* 2:1 at most, as tall as the first screen allows (hero-fold) or at least hero-max, and never so
+     short that a very wide screen loses the bee off the art's top (hero-bee-min). The art box keeps
+     this height in forced colors too, where the copy follows it. */
+  .hero,
+  .hero-art {
+    height: clamp(var(--hero-wide-min), var(--hero-wide-fluid), max(var(--hero-max), var(--hero-fold), var(--hero-bee-min)));
   }
 
   .hero-art {
     position: absolute;
     inset: 0;
-    height: auto;
+  }
+
+  /* The copy lies on the art: its lines and buttons take only their own width, so a click beside
+     them reaches the art. */
+  .hero-title,
+  .hero-tagline,
+  .hero .actions {
+    width: fit-content;
+  }
+
+  .hero-replay {
+    top: auto;
+    bottom: var(--space-6);
   }
 
   .hero-copy {
@@ -620,6 +670,16 @@ a:hover {
   .hero-art {
     position: relative;
     inset: auto;
-    height: clamp(var(--hero-wide-min), var(--hero-wide-fluid), var(--hero-max));
+  }
+
+  /* The copy, not the art, now ends the hero: the first section keeps its usual distance, and
+     Replay goes back under the copy, on the theme's own ground. */
+  .hero + .section {
+    padding-top: var(--space-24);
+  }
+
+  .hero-replay {
+    top: 100%;
+    bottom: auto;
   }
 }

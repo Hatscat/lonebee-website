@@ -134,7 +134,7 @@ const TINY = bitmapFont({
  * each paint call in the color it paints. The loop closes with an "end", a keyword.
  * @type {[number, [number, string][]][]}
  */
-const KIDS_CODE = [
+const JUNIOR_CODE = [
   [0, [[8, "peach"], [8, "beeswax"], [26, "wax"], [2, "wax"]]],
   [1, [[4, "peach"], [10, "beeswax"], [14, "wax"]]],
   [2, [[10, "beeswax"], [10, "coral"], [4, "wax"]]],
@@ -146,7 +146,7 @@ const KIDS_CODE = [
 ];
 
 /** The line that runs now: it paints the leaves, and a leaf is the next cell of the grid. */
-const KIDS_NOW = 4;
+const JUNIOR_NOW = 4;
 
 /**
  * Where the code starts, and its line pitch and indent, in pixels: its first line starts 3 rows
@@ -154,8 +154,8 @@ const KIDS_NOW = 4;
  */
 const CODE = { x: 14, y: 12, pitch: 8, indent: 8 };
 
-/** The kids' picture, cell by cell. */
-const KIDS_PICTURE = `
+/** The young coder's picture, cell by cell. */
+const JUNIOR_PICTURE = `
   ssssssss
   ssqpqsss
   sspcpsss
@@ -167,21 +167,21 @@ const KIDS_PICTURE = `
 `;
 
 /** Cells painted so far, in reading order: the next one is the left leaf's, at (1, 5). */
-const KIDS_PAINTED = 5 * 8 + 1;
+const JUNIOR_PAINTED = 5 * 8 + 1;
 
-/** Draw my code Kids: a few lines of code, and the 8×8 grid they paint, still being painted. */
-export function nextKids() {
+/** Draw my code Junior: a few lines of code, and the 8×8 grid they paint, still being painted. */
+export function nextJunior() {
   const out = new Raster(TILE.width, TILE.height, C["comb-black"]);
-  const widest = Math.max(...KIDS_CODE.map(([indent, tokens]) => indent * CODE.indent + tokens.reduce((w, [n]) => w + n + 2, -2)));
-  out.rect(CODE.x - 2, CODE.y + KIDS_NOW * CODE.pitch - 2, widest + 4, 6, C.propolis);
-  KIDS_CODE.forEach(([indent, tokens], line) => {
+  const widest = Math.max(...JUNIOR_CODE.map(([indent, tokens]) => indent * CODE.indent + tokens.reduce((w, [n]) => w + n + 2, -2)));
+  out.rect(CODE.x - 2, CODE.y + JUNIOR_NOW * CODE.pitch - 2, widest + 4, 6, C.propolis);
+  JUNIOR_CODE.forEach(([indent, tokens], line) => {
     let x = CODE.x + indent * CODE.indent;
     for (const [length, color] of tokens) {
       out.rect(x, CODE.y + line * CODE.pitch, length, 2, C[color]);
       x += length + 2;
     }
   });
-  const picture = sprite(KIDS_PICTURE, {
+  const picture = sprite(JUNIOR_PICTURE, {
     s: C.sky,
     p: C.coral,
     q: C.clover,
@@ -196,7 +196,7 @@ export function nextKids() {
   out.rect(x0, TILE.top, size, size, C.bark);
   for (let j = 0; j < 8; j++) {
     for (let i = 0; i < 8; i++) {
-      const color = j * 8 + i < KIDS_PAINTED ? picture.get(i, j) : C["comb-black"];
+      const color = j * 8 + i < JUNIOR_PAINTED ? picture.get(i, j) : C["comb-black"];
       out.rect(x0 + 1 + i * (cell + 1), TILE.top + 1 + j * (cell + 1), cell, cell, color);
     }
   }
@@ -265,7 +265,7 @@ export function nextTruthTable() {
   drawText(out, TINY, "A", inLabel, mid - 9, C.wax);
   drawText(out, TINY, "B", inLabel, mid + 5, C.wax);
   drawText(out, TINY, "Y", gx + gate.width + wire.out + LABEL_GAP, mid - 2, C.wax);
-  // The table, in the grid of the kids' tile: zeros faint, ones lit like the wires, and the one
+  // The table, in the grid of the Junior tile: zeros faint, ones lit like the wires, and the one
   // true output in gold.
   const colW = 15;
   const rowH = 12;

@@ -134,6 +134,8 @@
   --hero-fluid: 75vw;
   --hero-wide-fluid: 50vw;
   --hero-max: 760px;
+  --hero-fold: calc(100svh - 96px + 2vw);
+  --hero-bee-min: 40vw;
   --mark-size: 64px;
   --tap-min: 44px;
   --layer-art: 0;

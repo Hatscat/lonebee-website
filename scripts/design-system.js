@@ -98,7 +98,7 @@ the word.`,
   },
   Art: {
     tile: "l",
-    files: ["design/assets/hero-1500x750.png", "site/img/lost.png", "site/img/next/draw-my-code-kids.png", "site/img/next/truth-table-game.png"],
+    files: ["design/assets/hero-1500x750.png", "site/img/lost.png", "site/img/next/draw-my-code-junior.png", "site/img/next/truth-table-game.png"],
     note: `The pixel art. The hero: a lone honeybee hovering over a valley of the Ariège Pyrenees at
 golden hour, under the Montcalm and the Pic d'Estats, its wings lit through by the low sun, 300×150
 pixels (here at 5x). The 404 page: the same valley at the blue hour, and a carline thistle whose

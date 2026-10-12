@@ -13,6 +13,9 @@
  * everything bright (the glow, the clouds, the stars that twinkle, the bee, the lit summits and
  * their snow) lives in the right half. The first rows are bare night, so the art continues the
  * header without a seam; the last rows are the page background, so the art melts into the page.
+ * The page pins the art to the bottom right corner of its box: a box of another shape crops the
+ * left (on phones) or the top (on wide screens), never the meadow or the light, and the top's
+ * first SCENE.night rows are night alone, so cropping them leaves no seam under the header.
  *
  * Everything is drawn in the 32 palette colors, shaded by ramps with hatched strata (rows of
  * dashes) between steps, and lit by one sun, low on the right: every illustrated edge that faces
@@ -32,8 +35,16 @@ import { mark } from "./mark.js";
 const W = 300;
 const H = 150;
 
-/** @type {{ width: number, height: number, focus: [number, number] }} */
-export const SCENE = { width: W, height: H, focus: [0.8, 0.5] };
+/** Where the night's hatched edge into dusk runs, on average, in rows from the top (see nightEdge). */
+const NIGHT = 20.5;
+
+/**
+ * The scene's size; its focus, the point the social images are cut around; and its night: the rows
+ * at the top that hold only the night down to the middle of its hatched edge, which the page may
+ * crop without a seam under its night header.
+ * @type {{ width: number, height: number, focus: [number, number], night: number }}
+ */
+export const SCENE = { width: W, height: H, focus: [0.8, 0.5], night: Math.round(NIGHT) };
 
 /** The sun's center sits a row above the lowest point of the col, so about half its disc shows. */
 const SUN = { x: 254, y: 114, r: 9 };
@@ -168,7 +179,7 @@ function band(x, y) {
 const SOFT = [0, 4, 3, 3, 3, 2.5, 1.5];
 
 /** The night above the glow: rows over this line, with hatched strata. @param {number} x */
-const nightEdge = (x) => 20.5 + 1.2 * Math.sin(x / 37 + 1) + 0.7 * Math.sin(x / 13 + 2);
+const nightEdge = (x) => NIGHT + 1.2 * Math.sin(x / 37 + 1) + 0.7 * Math.sin(x / 13 + 2);
 
 /** @param {Raster} r */
 function paintSky(r) {
@@ -644,9 +655,8 @@ const SNOW = /** @type {[number, number, string][]} */ ([
  * burning face: a straight trunk showing between three tiers of tufts that stream on the side
  * the wind blows to, as the stems lean, the tips that face the sun catching it. It is a small
  * tree, outgrown by the firs: ten rows with its foot in the knoll, about eight showing, on a knoll
- * nearer than the forests. It stands three columns clear of the disc, and far enough left that a
- * phone 390 pixels wide, which shows columns 84 to 278, shows its whole crown; the narrowest
- * phones (96 to 275) lose only the tips of its two lowest leeward tufts.
+ * nearer than the forests. It stands three columns clear of the disc; the page pins the art to the
+ * right, so every phone shows its whole crown (a phone 390 pixels wide shows columns 105 to 299).
  */
 const PINE = sprite(
   `

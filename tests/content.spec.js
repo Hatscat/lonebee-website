@@ -22,7 +22,7 @@ const GAMES = [
 
 /** The games in the works. */
 const NEXT = [
-  { name: "Draw my code Kids", platforms: ["Mobile"] },
+  { name: "Draw my code Junior", platforms: ["Mobile"] },
   { name: "Truth Table Game", platforms: ["Web", "Mobile"] },
 ];
 

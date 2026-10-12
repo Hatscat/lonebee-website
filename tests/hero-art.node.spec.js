@@ -6,7 +6,7 @@
  */
 import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
-import { heroFrame } from "../art/build.js";
+import { beeBox, heroFrame } from "../art/build.js";
 import { decodePNG } from "../art/lib/png.js";
 import { C, PALETTE } from "../art/palette.js";
 import { BEE, MOTION, SCENE, background, beeFrames } from "../art/pieces/hero.js";
@@ -41,8 +41,23 @@ test("the scene keeps its size and its data matches the page's", () => {
   expect([SCENE.width, SCENE.height]).toEqual([300, 150]);
   expect(HERO.width).toBe(SCENE.width);
   expect(HERO.height).toBe(SCENE.height);
-  expect(HERO.focus).toEqual(SCENE.focus);
+  expect(HERO.night).toBe(SCENE.night);
+  expect(HERO.bee.box).toEqual(beeBox());
   expect(HERO.fps).toBe(MOTION.fps);
+});
+
+test("the rows the page may crop off the top are night, and the bee is far below them", () => {
+  for (const frame of [0, 1]) {
+    const art = background(frame);
+    for (let y = 0; y < SCENE.night; y++) {
+      let night = 0;
+      for (let x = 0; x < SCENE.width; x++) if (art.get(x, y) === C.night) night++;
+      // Bare night, then night dashes thinning into dusk down to the middle of the edge.
+      expect(night / SCENE.width, `frame ${frame}, row ${y}`).toBeGreaterThanOrEqual(0.5);
+    }
+  }
+  const [, top] = beeBox();
+  expect(top, "the bee's top row").toBeGreaterThan(2 * SCENE.night);
 });
 
 for (const frame of [0, 1]) {
@@ -85,13 +100,19 @@ test("the committed still image is the frame the build draws", async () => {
   expect(Buffer.from(file.rgba).equals(Buffer.from(still.rgba()))).toBe(true);
 });
 
-test("the loop lasts five seconds at most, and ends on the still frame", () => {
+test("the loop lasts five seconds at most, and repeats exactly, so it ends on the still frame", () => {
   expect(MOTION.flight.period).toBeLessThanOrEqual(5);
-  // hero.js rests on the still frame after one loop: the last frames must lead into it.
-  const end = heroFrame(MOTION.stillTime + MOTION.flight.period);
-  const still = heroFrame();
-  const differ = end.pixels.filter((c, i) => c !== still.pixels[i]).length;
-  expect(differ, "pixels that jump when the loop comes to rest").toBeLessThan(40);
+  // hero.js plays loops back to back when the visitor asks, and rests where one ends: every frame
+  // must come back the same a loop later, the still frame first.
+  const count = Math.round(MOTION.flight.period * MOTION.fps);
+  expect(count % BEE.frames, "whole cycles of the bee's frames").toBe(0);
+  expect((MOTION.flight.period * 1000) % (2 * MOTION.twinkleMs), "whole cycles of the twinkle").toBe(0);
+  const first = Math.round(MOTION.stillTime * MOTION.fps);
+  for (let n = first; n < first + count; n++) {
+    const now = heroFrame(n / MOTION.fps);
+    const later = heroFrame(n / MOTION.fps + MOTION.flight.period);
+    expect(Buffer.from(later.rgba()).equals(Buffer.from(now.rgba())), `frame ${n}`).toBe(true);
+  }
 });
 
 test("no pixel flashes more than three times in any second (WCAG 2.3.1)", () => {
@@ -106,16 +127,17 @@ test("no pixel flashes more than three times in any second (WCAG 2.3.1)", () => 
   const fps = MOTION.fps;
   const first = Math.round(MOTION.stillTime * fps);
   const count = Math.round(MOTION.flight.period * fps);
-  const frames = Array.from({ length: count + 1 }, (_, k) => heroFrame((first + k) / fps).pixels.map(luminance));
+  const frames = Array.from({ length: count }, (_, k) => heroFrame((first + k) / fps).pixels.map(luminance));
   const size = frames[0].length;
   let worst = 0;
-  // Every one-second window of the loop: 13 frames, 12 changes of frame.
-  for (let start = 0; start + fps <= count; start++) {
+  // Every one-second window, across the loop's end too, since loops may play back to back (the
+  // loop repeats exactly, see above): 13 frames, 12 changes of frame.
+  for (let start = 0; start < count; start++) {
     for (let p = 0; p < size; p++) {
       let level = frames[start][p];
       let changes = 0;
       for (let k = start + 1; k <= start + fps; k++) {
-        const now = frames[k][p];
+        const now = frames[k % count][p];
         // A change counts when the luminance moves by 0.1 or more and the darker side is under 0.8.
         if (Math.abs(now - level) >= 0.1 && Math.min(now, level) < 0.8) {
           changes++;

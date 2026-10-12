@@ -15,7 +15,7 @@ import { encodeICO } from "./lib/ico.js";
 import { Raster } from "./lib/raster.js";
 import { svgOf } from "./lib/svg.js";
 import { C, PALETTE } from "./palette.js";
-import { combCell, lost, nextKids, nextTruthTable, twinkle } from "./pieces/bits.js";
+import { combCell, lost, nextJunior, nextTruthTable, twinkle } from "./pieces/bits.js";
 import { flagFrance, heart, mountain } from "./pieces/glyphs.js";
 import { BEE, MOTION, SCENE, background, beeFrames } from "./pieces/hero.js";
 import { mark, markSmall } from "./pieces/mark.js";
@@ -81,16 +81,43 @@ function heroBees() {
   return out;
 }
 
+/**
+ * The box the bee's painted pixels fill over a whole loop, in scene pixels: [left, top, right,
+ * bottom], inclusive. The page checks it stays in view however the art is cropped.
+ * @returns {[number, number, number, number]}
+ */
+export function beeBox() {
+  const frames = beeFrames();
+  const box = /** @type {[number, number, number, number]} */ ([Infinity, Infinity, -Infinity, -Infinity]);
+  const first = Math.round(MOTION.stillTime * MOTION.fps);
+  for (let n = first; n < first + Math.round(MOTION.flight.period * MOTION.fps); n++) {
+    const { x, y, facing } = beeAt(MOTION.flight, n / MOTION.fps);
+    const sprite = frames[n % BEE.frames];
+    for (let j = 0; j < sprite.height; j++) {
+      for (let i = 0; i < sprite.width; i++) {
+        if (sprite.get(i, j) === null) continue;
+        const px = facing === 1 ? x - BEE.anchor[0] + i : x - (BEE.width - 1 - BEE.anchor[0]) + (BEE.width - 1 - i);
+        const py = y - BEE.anchor[1] + j;
+        box[0] = Math.min(box[0], px);
+        box[1] = Math.min(box[1], py);
+        box[2] = Math.max(box[2], px);
+        box[3] = Math.max(box[3], py);
+      }
+    }
+  }
+  return box;
+}
+
 /** The data hero.js animates with, as a module. */
 function heroData() {
   const data = {
     width: SCENE.width,
     height: SCENE.height,
-    focus: SCENE.focus,
+    night: SCENE.night,
     fps: MOTION.fps,
     stillTime: Math.round(MOTION.stillTime * MOTION.fps) / MOTION.fps,
     background: { src: "/img/hero-bg.png", frames: 2, frameMs: MOTION.twinkleMs },
-    bee: { src: "/img/hero-bee.png", width: BEE.width, height: BEE.height, frames: BEE.frames, anchor: BEE.anchor },
+    bee: { src: "/img/hero-bee.png", width: BEE.width, height: BEE.height, frames: BEE.frames, anchor: BEE.anchor, box: beeBox() },
     flight: MOTION.flight,
     trail: MOTION.trail,
   };
@@ -101,8 +128,8 @@ function heroData() {
     "/** The hero art's size, layers and motion, for hero.js. */",
     `export const HERO = ${JSON.stringify(data, null, 2)
       .replace(/"([a-zA-Z]+)":/g, "$1:")
-      // Number pairs on one line: [216, 67].
-      .replace(/\[\s+(-?[\d.]+),\s+(-?[\d.]+)\s+\]/g, "[$1, $2]")};`,
+      // Lists of numbers on one line: [216, 67].
+      .replace(/\[\s+(-?[\d.]+(?:,\s+-?[\d.]+)*)\s+\]/g, (_, list) => `[${list.split(/,\s+/).join(", ")}]`)};`,
     "",
   ].join("\n");
 }
@@ -192,7 +219,7 @@ export function outputs() {
     { path: "site/js/hero-data.js", text: heroData() },
     { path: "site/img/og.png", raster: og(), scale: 5 },
     { path: "site/img/lost.png", raster: lost() },
-    { path: "site/img/next/draw-my-code-kids.png", raster: nextKids() },
+    { path: "site/img/next/draw-my-code-junior.png", raster: nextJunior() },
     { path: "site/img/next/truth-table-game.png", raster: nextTruthTable() },
     // Brand kit, for itch.io, stores and social pages (design/README.md, "Platforms").
     { path: "design/assets/mark-512.png", raster: mark(), scale: 16 },

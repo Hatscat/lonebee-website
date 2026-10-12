@@ -19,8 +19,8 @@ color, and on any raw length outside a media query.
 - US English: color, center, favorite.
 - Sentence case for every heading, button and link: "Play today's puzzle", never "Play Today's
   Puzzle". Uppercase only inside pixel art (the wordmark, captions in images).
-- Name each game exactly: **Limpid Chess**, **Draw my code**, **Draw my code Kids**, **Truth Table
-  Game**. Lead Limpid Chess with the word "smooth", as its own site does.
+- Name each game exactly: **Limpid Chess**, **Draw my code**, **Draw my code Junior**, **Truth
+  Table Game**. Lead Limpid Chess with the word "smooth", as its own site does.
 - Every claim must hold for every game, the future ones included: no blanket "free" or "no ads".
 - Buttons say what happens: "Play in the browser", "Get it on Google Play", "Follow on itch.io".
 - Separate facts with a middle dot: "© Lone Bee · No cookies · Crafted with ♥ in the Pyrenees"
@@ -134,6 +134,10 @@ Atkinson Hyperlegible was drawn by the Braille Institute for low-vision readers:
   of cards), 1100px (the hero copy moves onto the art).
 - The hero art spans the full width. Under 1100px the copy follows it on `bg`; from 1100px the copy
   sits on the art's calm left sky, which the art keeps dark by rule (see Pixel art).
+- The art is pinned to the bottom right of its box: a box of another shape crops its left (on
+  phones) or its top (on wide screens), never the meadow or the light. From 1100px the hero is 2:1
+  where it fits, grows up to the first screen (`hero-fold`), and never gets so short that a very
+  wide screen crops the bee (`hero-bee-min`).
 - Tap targets are at least `tap-min` (44px) tall.
 
 ## Shape: pixels, frames and drops
@@ -196,7 +200,11 @@ Atkinson Hyperlegible was drawn by the Braille Institute for low-vision readers:
   it flies one small figure-eight (the shape of a honeybee's waggle dance) and the stars twinkle;
   then it rests on the still frame. Motion that starts by itself stops within five seconds, so no
   pause button is needed (WCAG 2.2.2).
-- `prefers-reduced-motion` keeps the still image from the start. Off screen, the loop pauses.
+- A click on the art plays one more loop, on from where the bee is, and so does Replay, a button
+  that shows only on keyboard focus. Motion the visitor starts lasts six seconds at most, and
+  clicks never stack.
+- `prefers-reduced-motion` keeps the still image from the start, with no Replay. Off screen, the
+  loop pauses.
 - Nothing flashes more than three times a second.
 
 ## Pixel art
@@ -219,8 +227,9 @@ Atkinson Hyperlegible was drawn by the Braille Institute for low-vision readers:
 - On dark grounds, keep the bee's silhouette whole: a cool rim (`slate`, `deep-teal`) under its dark
   parts.
 - In the hero, the sky behind the copy (columns 0 to 150, rows 0 to 105) stays dark: only `night`,
-  `dusk`, `slate`, a few `deep-teal` stars and dark hills. The last 6 rows are `hive`, so the art
-  melts into the page. A test enforces both.
+  `dusk`, `slate`, a few `deep-teal` stars and dark hills. Its first 21 rows are night, down to the
+  middle of its hatched edge into dusk, so a wide screen may crop them with no seam under the
+  night header. The last 6 rows are `hive`, so the art melts into the page. Tests enforce all three.
 - Everything is drawn in code (`art/` in the website repository) and generated: change the source,
   never the image.
 

@@ -1,19 +1,30 @@
 // @ts-check
 /**
- * The site's only script. The page is complete without it; it improves the hero art twice over:
+ * The hero's script. The page is complete without it; it improves the hero art three ways:
  *
- * - It sizes the art at a whole number of device pixels per art pixel, covering its box. CSS alone
- *   scales by fractions, which leaves some art pixels a device pixel wider than others.
+ * - It sizes the art at a whole number of device pixels per art pixel, pinned to the bottom right
+ *   corner of its box like the CSS fallback: a box of another shape crops the art's left or top,
+ *   never its meadow or its light. CSS alone scales by fractions, which leaves some art pixels a
+ *   device pixel wider than others.
  * - Unless the visitor prefers reduced motion, it animates the scene on a canvas laid over the
  *   still image, at a pixel art frame rate: the wings beat, the bee flies one loop of its
  *   figure-eight and the stars twinkle. It starts from the very frame the still shows, pauses off
  *   screen, and after one loop rests on that frame again: motion that starts by itself stops
  *   within five seconds (WCAG 2.2.2), so the page needs no pause button.
+ * - A click on the art plays one more loop, and so does a Replay button for the keyboard, which
+ *   shows only when focused. Motion the visitor starts lasts six seconds at most.
  *
  * `data-motion` on the hero box tells its state: "still", "playing" or "paused".
  */
 import { beeAt, trailAt } from "./flight.js";
 import { HERO } from "./hero-data.js";
+
+/**
+ * The most rows of night, in art pixels, that the art may leave above itself when the scale that
+ * covers its box would crop more than its night (see snap): the header's night, that band and the
+ * art's own night rows read as one sky.
+ */
+const GAP = 30;
 
 const box = document.querySelector("[data-hero]");
 const still = box?.querySelector("img");
@@ -48,9 +59,11 @@ async function start(box, still) {
   ctx.imageSmoothingEnabled = false;
 
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  const period = HERO.flight.period;
   let raf = 0;
   let elapsed = 0; // seconds of animation played, kept across pauses
   let resumedAt = 0;
+  let end = period; // when to come to rest: the end of a loop, where the still frame comes back
   let lastFrame = -1;
   let onScreen = true;
   let done = false;
@@ -66,11 +79,12 @@ async function start(box, still) {
   /** @param {number} now */
   const tick = (now) => {
     const t = elapsed + (now - resumedAt) / 1000;
-    if (t >= HERO.flight.period) {
-      // One loop flown: back to the still frame, for good.
+    if (t >= end) {
+      // The last loop is flown: back to the still frame, until the visitor asks for another.
       raf = 0;
       done = true;
-      draw(0);
+      elapsed = end;
+      draw(end);
       box.dataset.motion = "still";
       return;
     }
@@ -91,6 +105,20 @@ async function start(box, still) {
     }
     if (!done) box.dataset.motion = state;
   };
+  /**
+   * One more loop, from where the bee is: the loop is periodic and ends on the still frame, so it
+   * plays on without a jump. Half a loop or more still to fly is answer enough, so a double click
+   * or a held key never stacks loops.
+   */
+  const replay = () => {
+    if (reduce.matches) return;
+    const t = Math.min(end, raf ? elapsed + (performance.now() - resumedAt) / 1000 : elapsed);
+    if (end - t >= period / 2) return;
+    done = false;
+    end += period;
+    if (onScreen) play();
+    else box.dataset.motion = "paused";
+  };
 
   reduce.addEventListener("change", () => {
     canvas.hidden = reduce.matches;
@@ -105,6 +133,29 @@ async function start(box, still) {
     if (onScreen) play();
     else pause("paused");
   }).observe(box);
+
+  // A click on the art, anywhere the copy leaves it uncovered. The listener sits on the document,
+  // so no element of the hero reads as clickable to assistive technology: the button below is
+  // the accessible way. Text, controls and the space around the buttons (a near miss) keep their
+  // own clicks, and a drag that selected text is no click on the art.
+  const hero = box.parentElement ?? box;
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element) || !hero.contains(target)) return;
+    if (target.closest("a, button, .hero-title, .hero-tagline, .actions")) return;
+    const r = box.getBoundingClientRect();
+    if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) return;
+    if (!(document.getSelection()?.isCollapsed ?? true)) return;
+    replay();
+  });
+  // For the keyboard: a real button after the copy, out of sight until it has focus (site.css).
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "button hero-replay";
+  button.textContent = "Replay";
+  button.setAttribute("aria-label", "Replay the animation");
+  button.addEventListener("click", replay);
+  hero.append(button);
 
   draw(0); // the still frame: swapping the image for the canvas changes no pixel
   canvas.hidden = reduce.matches;
@@ -147,9 +198,11 @@ function paint(ctx, background, bee, n) {
 }
 
 /**
- * Sizes the layers so one art pixel spans a whole number of device pixels, the smallest that
- * covers the box, and places the art's focus point where `object-position` would put it, on the
- * device pixel grid.
+ * Sizes the layers so one art pixel spans a whole number of device pixels, and pins the art to the
+ * bottom right corner of the box on the device pixel grid. The scale is the smallest that covers
+ * the box, unless that crops more than the art's night off its top while a step smaller still
+ * spans the width: then the art leaves a band of night above it instead, at most GAP rows, which
+ * the box's own night background fills.
  * @param {HTMLElement} box
  * @param {HTMLElement[]} layers
  */
@@ -157,18 +210,22 @@ function snap(box, layers) {
   const dpr = window.devicePixelRatio || 1;
   const rect = box.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
-  const k = Math.max(1, Math.ceil(Math.max((rect.width * dpr) / HERO.width, (rect.height * dpr) / HERO.height) - 1e-6));
-  const w = (HERO.width * k) / dpr;
-  const h = (HERO.height * k) / dpr;
-  // The box may itself start between two device pixels: align the art to the page's grid.
-  const left = rect.left + window.scrollX;
-  const top = rect.top + window.scrollY;
-  const x = Math.round((left + (rect.width - w) * HERO.focus[0]) * dpr) / dpr - left;
-  const y = Math.round((top + (rect.height - h) * HERO.focus[1]) * dpr) / dpr - top;
+  // The box's edges in device pixels from the page's origin. The tolerance absorbs inexact
+  // ratios: Chromium reports 110% zoom as 1.100000023841858.
+  const pageLeft = rect.left + window.scrollX;
+  const pageTop = rect.top + window.scrollY;
+  const left = Math.floor(pageLeft * dpr + 1e-3);
+  const top = Math.floor(pageTop * dpr + 1e-3);
+  const right = Math.ceil((pageLeft + rect.width) * dpr - 1e-3);
+  const bottom = Math.ceil((pageTop + rect.height) * dpr - 1e-3);
+  const [w, h] = [right - left, bottom - top];
+  let k = Math.max(1, Math.ceil(Math.max(w / HERO.width, h / HERO.height) - 1e-6));
+  if (k > 1 && HERO.height - h / k > HERO.night && (k - 1) * HERO.width >= w && h / (k - 1) - HERO.height <= GAP) k -= 1;
+  const [artWidth, artHeight] = [HERO.width * k, HERO.height * k];
   for (const layer of layers) {
-    layer.style.width = `${w}px`;
-    layer.style.height = `${h}px`;
-    layer.style.transform = `translate(${x}px, ${y}px)`;
+    layer.style.width = `${artWidth / dpr}px`;
+    layer.style.height = `${artHeight / dpr}px`;
+    layer.style.transform = `translate(${(right - artWidth) / dpr - pageLeft}px, ${(bottom - artHeight) / dpr - pageTop}px)`;
   }
   box.classList.add("is-snapped");
 }

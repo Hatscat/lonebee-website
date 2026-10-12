@@ -51,6 +51,8 @@ test.describe("keyboard", () => {
 
   test("every control can be reached, and shows a clear focus ring", async ({ page, browserName }) => {
     await page.goto("/");
+    // hero.js adds Replay once the art's frames have loaded: count it in.
+    await expect(page.locator(".hero-replay")).toBeAttached();
     const expected = await page.locator("a[href], button, [tabindex='0']").count();
     // Tab until focus comes back to an element already visited, or leaves the page: past the last
     // control, browsers move focus to their own interface.
@@ -62,7 +64,7 @@ test.describe("keyboard", () => {
         el.dataset.visited = "";
         const style = getComputedStyle(el);
         return {
-          name: `${el.tagName.toLowerCase()} ${(el.textContent ?? "").trim() || el.getAttribute("href")}`,
+          name: `${el.tagName.toLowerCase()} ${el.getAttribute("aria-label") || (el.textContent ?? "").trim() || el.getAttribute("href")}`,
           outline: style.outlineStyle !== "none" ? parseFloat(style.outlineWidth) : 0,
         };
       });
@@ -83,6 +85,35 @@ test.describe("keyboard", () => {
     }
     await expect(page.locator("[data-visited]"), "every control is reached once").toHaveCount(expected);
   });
+});
+
+test("in forced colors, Replay shows off the art, where the theme's focus ring meets the theme's ground", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "forced colors are emulated in Chromium only");
+  // The art keeps its own colors in forced colors; a theme's ring on it could vanish.
+  for (const width of [390, 1440]) {
+    for (const colorScheme of /** @type {const} */ (["light", "dark"])) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.emulateMedia({ forcedColors: "active", colorScheme });
+      await page.goto("/");
+      const replay = page.getByRole("button", { name: "Replay the animation" });
+      await expect(replay).toBeAttached();
+      await page.locator(".hero").getByRole("link", { name: "Follow on itch.io" }).focus();
+      await page.keyboard.press("Tab");
+      await expect(replay).toBeFocused();
+      const seen = await replay.evaluate((b) => {
+        const s = getComputedStyle(b);
+        const ring = parseFloat(s.outlineOffset) + parseFloat(s.outlineWidth);
+        const r = b.getBoundingClientRect();
+        const art = /** @type {Element} */ (document.querySelector(".hero-art")).getBoundingClientRect();
+        const apart = r.top - ring >= art.bottom || r.bottom + ring <= art.top || r.left - ring >= art.right || r.right + ring <= art.left;
+        return { style: s.outlineStyle, width: parseFloat(s.outlineWidth), apart };
+      });
+      const where = `${width}px, ${colorScheme}`;
+      expect(seen.style, where).toBe("solid");
+      expect(seen.width, where).toBeGreaterThanOrEqual(2);
+      expect(seen.apart, `${where}: the focused Replay and its ring stay off the art`).toBe(true);
+    }
+  }
 });
 
 test("reduced motion turns every transition and animation off", async ({ browser }) => {

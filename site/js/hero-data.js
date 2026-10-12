@@ -5,7 +5,7 @@
 export const HERO = {
   width: 300,
   height: 150,
-  focus: [0.8, 0.5],
+  night: 21,
   fps: 12,
   stillTime: 0,
   background: {
@@ -18,7 +18,8 @@ export const HERO = {
     width: 40,
     height: 36,
     frames: 48,
-    anchor: [23, 18]
+    anchor: [23, 18],
+    box: [194, 50, 232, 80]
   },
   flight: {
     center: [216, 67],
