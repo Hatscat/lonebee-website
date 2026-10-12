@@ -116,6 +116,20 @@ test("in forced colors, Replay shows off the art, where the theme's focus ring m
   }
 });
 
+test("a drag can select into a button's label: the button's wider hit area lies under it", async ({ page }) => {
+  await page.goto("/");
+  const lead = page.locator("#follow .section-lead");
+  const button = page.locator("#follow").getByRole("link", { name: "Follow on itch.io" });
+  await button.scrollIntoViewIfNeeded();
+  const [from, to] = await Promise.all([lead.boundingBox(), button.boundingBox()]);
+  if (!from || !to) throw new Error("no boxes");
+  await page.mouse.move(from.x + 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 8 });
+  await page.mouse.up();
+  expect(await page.evaluate(() => String(document.getSelection())), "the selection reaches the label").toContain("Follow o");
+});
+
 test("reduced motion turns every transition and animation off", async ({ browser }) => {
   const context = await browser.newContext({ reducedMotion: "reduce" });
   const page = await context.newPage();

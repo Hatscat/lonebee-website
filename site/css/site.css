@@ -183,15 +183,33 @@ a:hover {
 }
 
 .button {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
   padding: var(--space-3) var(--space-6);
+  border: 0;
   background: var(--surface);
   color: var(--text);
   font: var(--type-label);
   text-decoration: none;
+  cursor: pointer;
   box-shadow: var(--shadow-button-secondary);
+}
+
+/* The frame and the drop are shadows, outside the box: this layer makes them part of the button,
+   so a click on any of its pixels follows it, pressed too, when the button slides onto its drop.
+   It lies under the label, which a drag can still select. */
+.button::before {
+  position: absolute;
+  z-index: var(--layer-under);
+  inset: calc(-1 * var(--pixel)) calc(-1 * (var(--pixel) + var(--drop))) calc(-1 * (var(--pixel) + var(--drop))) calc(-1 * var(--pixel));
+  content: "";
+}
+
+.button:active:not([aria-disabled="true"])::before {
+  inset: calc(-1 * (var(--pixel) + var(--drop))) calc(-1 * var(--pixel)) calc(-1 * var(--pixel)) calc(-1 * (var(--pixel) + var(--drop)));
 }
 
 .button:hover {
@@ -278,6 +296,14 @@ a:hover {
   display: none;
 }
 
+/* Laid by hero.js over the bee, to tell whether the bee is in view: invisible, and clicks pass. */
+.hero-bee {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
 .hero-copy {
   position: relative;
   z-index: var(--layer-content);
@@ -302,15 +328,15 @@ a:hover {
 }
 
 /* Replay, for the keyboard (a click on the art replays it too): hero.js adds this button after the
-   copy. Like the skip link, it stays out of sight until it has keyboard focus, then shows in line
-   with the copy: under its buttons while the copy follows the art (on the page, never on the
-   art's stars and flowers), on the art's dark meadow once the copy lies on it. Under reduced
-   motion there is nothing to replay. */
+   copy's buttons. Like the skip link, it stays out of sight until it has keyboard focus, then shows
+   under them, in line with the copy: on the art's dark sky once the copy lies on it, so focusing
+   it scrolls nothing away; on the page while the copy follows the art. Under reduced motion there
+   is nothing to replay. */
 .hero-replay {
   position: absolute;
   top: 100%;
   left: var(--gutter-narrow);
-  z-index: var(--layer-content);
+  scroll-margin-block: calc(var(--focus-offset-button) + var(--focus-width));
 }
 
 .hero-replay:not(:focus-visible) {
@@ -320,7 +346,7 @@ a:hover {
 
 @media (min-width: 600px) {
   .hero-replay {
-    left: max(var(--gutter), (100% - var(--content-max)) / 2);
+    left: var(--gutter);
   }
 }
 
@@ -338,9 +364,9 @@ a:hover {
 }
 
 @media (min-width: 1100px) {
-  /* 2:1 at most, as tall as the first screen allows (hero-fold) or at least hero-max, and never so
-     short that a very wide screen loses the bee off the art's top (hero-bee-min). The art box keeps
-     this height in forced colors too, where the copy follows it. */
+  /* 2:1 where it fits, as tall as the first screen allows (hero-fold) or at least hero-max, and
+     never so short that a very wide screen loses the bee off the art's top (hero-bee-min, at 67%
+     zoom or more). The art box keeps this height in forced colors too, where the copy follows it. */
   .hero,
   .hero-art {
     height: clamp(var(--hero-wide-min), var(--hero-wide-fluid), max(var(--hero-max), var(--hero-fold), var(--hero-bee-min)));
@@ -357,11 +383,6 @@ a:hover {
   .hero-tagline,
   .hero .actions {
     width: fit-content;
-  }
-
-  .hero-replay {
-    top: auto;
-    bottom: var(--space-6);
   }
 
   .hero-copy {
@@ -672,14 +693,9 @@ a:hover {
     inset: auto;
   }
 
-  /* The copy, not the art, now ends the hero: the first section keeps its usual distance, and
-     Replay goes back under the copy, on the theme's own ground. */
+  /* The copy, not the art, now ends the hero: the first section keeps its usual distance, with
+     room for Replay under the copy, on the theme's own ground. */
   .hero + .section {
     padding-top: var(--space-24);
-  }
-
-  .hero-replay {
-    top: 100%;
-    bottom: auto;
   }
 }

@@ -108,11 +108,12 @@ docs/PLAN.md     The plan.
   and ordered dithering.
 - Scale by whole numbers only (nearest neighbor). On the page, use `image-rendering: pixelated`.
 - The hero art keeps its contract with the page (`tests/hero-art.node.spec.js`): only dark colors
-  under the hero copy (columns 0 to 150, rows 0 to 105), night alone in its first `SCENE.night`
-  rows, its last 6 rows in `hive`, one flight loop of five seconds at most that repeats exactly,
-  no pixel flashing more than three times a second. The page pins it to the bottom right of its box
-  (`tests/layout.spec.js`): crops come off its top and left, never its bottom or right, and never
-  reach the bee.
+  under the hero copy (columns 0 to 150, rows 0 to 105), mostly night in its first `SCENE.night`
+  rows (each at least half: bare night with a few dim stars, then the upper half of its hatched
+  edge into dusk), its last 6 rows in `hive`, one flight loop of five seconds at most that repeats
+  exactly, no pixel flashing more than three times a second. The page pins it to the bottom right
+  of its box (`tests/layout.spec.js`): crops come off its top and left, never its bottom or right,
+  and never reach the bee (from 320px wide, at a browser zoom of 67% or more).
 
 ### Copy
 

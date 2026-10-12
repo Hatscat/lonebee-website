@@ -14,8 +14,9 @@
  * their snow) lives in the right half. The first rows are bare night, so the art continues the
  * header without a seam; the last rows are the page background, so the art melts into the page.
  * The page pins the art to the bottom right corner of its box: a box of another shape crops the
- * left (on phones) or the top (on wide screens), never the meadow or the light, and the top's
- * first SCENE.night rows are night alone, so cropping them leaves no seam under the header.
+ * left (on phones) or the top (on wide screens), never the meadow or the light. The top's first
+ * SCENE.night rows are mostly night, so cropping them leaves no seam under the header; short wide
+ * windows crop a few rows more, where the header meets the dusk in a near-straight line.
  *
  * Everything is drawn in the 32 palette colors, shaded by ramps with hatched strata (rows of
  * dashes) between steps, and lit by one sun, low on the right: every illustrated edge that faces
@@ -40,8 +41,8 @@ const NIGHT = 20.5;
 
 /**
  * The scene's size; its focus, the point the social images are cut around; and its night: the rows
- * at the top that hold only the night down to the middle of its hatched edge, which the page may
- * crop without a seam under its night header.
+ * at the top that are mostly night (bare night with a few dim stars, then the upper half of its
+ * hatched edge into dusk), which the page may crop without a seam under its night header.
  * @type {{ width: number, height: number, focus: [number, number], night: number }}
  */
 export const SCENE = { width: W, height: H, focus: [0.8, 0.5], night: Math.round(NIGHT) };

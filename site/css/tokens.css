@@ -138,6 +138,7 @@
   --hero-bee-min: 40vw;
   --mark-size: 64px;
   --tap-min: 44px;
+  --layer-under: -1;
   --layer-art: 0;
   --layer-content: 1;
   --layer-skip: 100;

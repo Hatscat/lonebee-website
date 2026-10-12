@@ -87,6 +87,27 @@ test("the bee stays out of the header and the copy, whatever its frame", () => {
   }
 });
 
+test("the bee's box is where its pixels show, over a whole loop", () => {
+  // Found from the frames themselves, not from the code that writes HERO.bee.box.
+  const fps = MOTION.fps;
+  const first = Math.round(MOTION.stillTime * fps);
+  const found = [Infinity, Infinity, -Infinity, -Infinity];
+  for (let n = first; n < first + Math.round(MOTION.flight.period * fps); n++) {
+    const frame = heroFrame(n / fps);
+    const ground = background(Math.floor(((n / fps) * 1000) / MOTION.twinkleMs) % 2);
+    for (let y = 0; y < SCENE.height; y++) {
+      for (let x = 0; x < SCENE.width; x++) {
+        if (frame.get(x, y) === ground.get(x, y)) continue;
+        found[0] = Math.min(found[0], x);
+        found[1] = Math.min(found[1], y);
+        found[2] = Math.max(found[2], x);
+        found[3] = Math.max(found[3], y);
+      }
+    }
+  }
+  expect(found).toEqual(HERO.bee.box);
+});
+
 test("every layer is palette only", () => {
   for (const raster of [background(0), background(1), ...beeFrames()]) {
     for (const color of raster.colors()) expect(PALETTE.has(color), color).toBe(true);

@@ -8,9 +8,10 @@
  *   device pixel wider than others.
  * - Unless the visitor prefers reduced motion, it animates the scene on a canvas laid over the
  *   still image, at a pixel art frame rate: the wings beat, the bee flies one loop of its
- *   figure-eight and the stars twinkle. It starts from the very frame the still shows, pauses off
- *   screen, and after one loop rests on that frame again: motion that starts by itself stops
- *   within five seconds (WCAG 2.2.2), so the page needs no pause button.
+ *   figure-eight and the stars twinkle. It starts from the very frame the still shows, pauses
+ *   while the bee is out of view or the tab hidden, and after one loop rests on that frame again:
+ *   motion that starts by itself stops within five seconds (WCAG 2.2.2), so the page needs no
+ *   pause button.
  * - A click on the art plays one more loop, and so does a Replay button for the keyboard, which
  *   shows only when focused. Motion the visitor starts lasts six seconds at most.
  *
@@ -37,7 +38,9 @@ if (box instanceof HTMLElement && still instanceof HTMLImageElement) start(box, 
 async function start(box, still) {
   /** @type {HTMLElement[]} */
   const layers = [still];
-  const place = () => snap(box, layers);
+  /** @type {HTMLElement | null} laid over the bee once the animation is set up */
+  let spot = null;
+  const place = () => snap(box, layers, spot);
   new ResizeObserver(place).observe(box);
   onPixelRatioChange(place);
   box.dataset.motion = "still";
@@ -65,7 +68,7 @@ async function start(box, still) {
   let resumedAt = 0;
   let end = period; // when to come to rest: the end of a loop, where the still frame comes back
   let lastFrame = -1;
-  let onScreen = true;
+  let onScreen = false; // until the observer below has seen the bee
   let done = false;
 
   /** @param {number} t seconds since the still frame's time */
@@ -92,7 +95,7 @@ async function start(box, still) {
     draw(t);
   };
   const play = () => {
-    if (raf || done || !onScreen || reduce.matches) return;
+    if (raf || done || !onScreen || document.hidden || reduce.matches) return;
     resumedAt = performance.now();
     raf = requestAnimationFrame(tick);
     box.dataset.motion = "playing";
@@ -116,8 +119,8 @@ async function start(box, still) {
     if (end - t >= period / 2) return;
     done = false;
     end += period;
-    if (onScreen) play();
-    else box.dataset.motion = "paused";
+    play();
+    if (!raf) box.dataset.motion = "paused"; // it plays once the bee is back in view
   };
 
   reduce.addEventListener("change", () => {
@@ -126,36 +129,64 @@ async function start(box, still) {
     else if (!onScreen) pause("paused");
     else play();
   });
-  new IntersectionObserver((entries) => {
-    // Several changes may queue before a callback: the last one is the current state.
-    onScreen = entries[entries.length - 1].isIntersecting;
+  // On screen means the bee, half of it at least, is: a loop flown with only a strip of meadow in
+  // view would be lost to the visitor.
+  spot = document.createElement("div");
+  spot.className = "hero-bee";
+  spot.setAttribute("aria-hidden", "true");
+  box.append(spot);
+  place();
+  new IntersectionObserver(
+    (entries) => {
+      // Several changes may queue before a callback: the last one is the current state.
+      onScreen = entries[entries.length - 1].intersectionRatio >= 0.5;
+      if (reduce.matches || done) return;
+      if (onScreen) play();
+      else pause("paused");
+    },
+    { threshold: [0, 0.5, 1] },
+  ).observe(spot);
+  // A hidden tab gets no frames while the clock runs on: pause, so no part of a loop is lost.
+  document.addEventListener("visibilitychange", () => {
     if (reduce.matches || done) return;
-    if (onScreen) play();
-    else pause("paused");
-  }).observe(box);
+    if (document.hidden) pause("paused");
+    else play();
+  });
 
   // A click on the art, anywhere the copy leaves it uncovered. The listener sits on the document,
   // so no element of the hero reads as clickable to assistive technology: the button below is
-  // the accessible way. Text, controls and the space around the buttons (a near miss) keep their
-  // own clicks, and a drag that selected text is no click on the art.
+  // the accessible way. Text, controls and the space between the buttons (a near miss) keep their
+  // own clicks. A press that selected text, or dragged across some, ends in a click too: it is no
+  // click on the art, while a selection made before, elsewhere on the page, changes nothing.
   const hero = box.parentElement ?? box;
+  let press = { x: 0, y: 0, text: "" };
+  document.addEventListener("pointerdown", (event) => (press = { x: event.clientX, y: event.clientY, text: String(document.getSelection() ?? "") }), true);
   document.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof Element) || !hero.contains(target)) return;
     if (target.closest("a, button, .hero-title, .hero-tagline, .actions")) return;
     const r = box.getBoundingClientRect();
     if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) return;
-    if (!(document.getSelection()?.isCollapsed ?? true)) return;
+    const selection = document.getSelection();
+    const dragged = Math.hypot(event.clientX - press.x, event.clientY - press.y) > 4;
+    if (selection && !selection.isCollapsed && (String(selection) !== press.text || dragged)) return;
     replay();
   });
-  // For the keyboard: a real button after the copy, out of sight until it has focus (site.css).
+  // For the keyboard: a real button after the copy's buttons, out of sight until it has focus
+  // (site.css). Reaching it may have scrolled the bee out of view: bring the bee back to watch.
   const button = document.createElement("button");
   button.type = "button";
   button.className = "button hero-replay";
   button.textContent = "Replay";
   button.setAttribute("aria-label", "Replay the animation");
-  button.addEventListener("click", replay);
-  hero.append(button);
+  button.addEventListener("click", () => {
+    replay();
+    if (!onScreen) spot?.scrollIntoView({ block: "nearest" });
+  });
+  // Browsers scroll a focused control into view, not its ring or its drop, and Firefox leaves a
+  // half-shown one where it is: show the whole of it (its scroll margin holds the ring).
+  button.addEventListener("focus", () => button.scrollIntoView({ block: "nearest" }));
+  (hero.querySelector(".hero-copy") ?? hero).append(button);
 
   draw(0); // the still frame: swapping the image for the canvas changes no pixel
   canvas.hidden = reduce.matches;
@@ -202,11 +233,12 @@ function paint(ctx, background, bee, n) {
  * bottom right corner of the box on the device pixel grid. The scale is the smallest that covers
  * the box, unless that crops more than the art's night off its top while a step smaller still
  * spans the width: then the art leaves a band of night above it instead, at most GAP rows, which
- * the box's own night background fills.
+ * the box's own night background fills. The spot, if any, goes over the bee.
  * @param {HTMLElement} box
  * @param {HTMLElement[]} layers
+ * @param {HTMLElement | null} spot
  */
-function snap(box, layers) {
+function snap(box, layers, spot) {
   const dpr = window.devicePixelRatio || 1;
   const rect = box.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
@@ -222,10 +254,18 @@ function snap(box, layers) {
   let k = Math.max(1, Math.ceil(Math.max(w / HERO.width, h / HERO.height) - 1e-6));
   if (k > 1 && HERO.height - h / k > HERO.night && (k - 1) * HERO.width >= w && h / (k - 1) - HERO.height <= GAP) k -= 1;
   const [artWidth, artHeight] = [HERO.width * k, HERO.height * k];
+  const [x, y] = [(right - artWidth) / dpr - pageLeft, (bottom - artHeight) / dpr - pageTop];
   for (const layer of layers) {
     layer.style.width = `${artWidth / dpr}px`;
     layer.style.height = `${artHeight / dpr}px`;
-    layer.style.transform = `translate(${(right - artWidth) / dpr - pageLeft}px, ${(bottom - artHeight) / dpr - pageTop}px)`;
+    layer.style.transform = `translate(${x}px, ${y}px)`;
+  }
+  if (spot) {
+    const [x0, y0, x1, y1] = HERO.bee.box;
+    const size = k / dpr;
+    spot.style.width = `${(x1 - x0 + 1) * size}px`;
+    spot.style.height = `${(y1 - y0 + 1) * size}px`;
+    spot.style.transform = `translate(${x + x0 * size}px, ${y + y0 * size}px)`;
   }
   box.classList.add("is-snapped");
 }

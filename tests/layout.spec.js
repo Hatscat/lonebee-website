@@ -79,10 +79,19 @@ async function pinFailures(page, label) {
         for (const [edge, v] of [["left", r.left + scrollX], ["top", r.top + scrollY]]) {
           if (Math.abs(v * dpr - Math.round(v * dpr)) > 0.01) out.push(`${name}: ${edge} edge off the device grid`);
         }
-        for (const [edge, over] of [["right", r.right - box.right], ["bottom", r.bottom - box.bottom]]) {
-          // Layout measures in 1/64 px: a hair of tolerance, far under a visible seam.
-          if (over * dpr < -0.05 || over * dpr > 1.05) out.push(`${name}: ${edge} edge ${(over * dpr).toFixed(2)} device px off the box's`);
+        // The box's edges on the device grid, as hero.js finds them: the art's right and bottom edges
+        // must land on the box's far edges, rounded out to the grid (layout measures in 1/64 px).
+        const [left, top] = [(box.left + scrollX) * dpr, (box.top + scrollY) * dpr];
+        const R = Math.ceil((box.right + scrollX) * dpr - 1e-3);
+        const B = Math.ceil((box.bottom + scrollY) * dpr - 1e-3);
+        for (const [edge, at, want] of [["right", (r.right + scrollX) * dpr, R], ["bottom", (r.bottom + scrollY) * dpr, B]]) {
+          if (Math.abs(at - want) > 0.05) out.push(`${name}: ${edge} edge at device px ${at.toFixed(2)}, not ${want}`);
         }
+        // The scale the rule asks for: cover, or a step smaller with a band of night (hero.js snap).
+        const [w, h] = [R - Math.floor(left + 1e-3), B - Math.floor(top + 1e-3)];
+        const cover = Math.max(1, Math.ceil(Math.max(w / art.width, h / art.height) - 1e-6));
+        const smaller = cover > 1 && art.height - h / cover > art.night && (cover - 1) * art.width >= w && h / (cover - 1) - art.height <= gap;
+        if (Math.round(k) !== (smaller ? cover - 1 : cover)) out.push(`${name}: scale ${Math.round(k)}, the rule wants ${smaller ? cover - 1 : cover}`);
         if (r.left > box.left + 0.01) out.push(`${name}: the left edge shows the box`);
         const pixel = r.height / art.height;
         const band = (r.top - box.top) / pixel;
@@ -97,12 +106,14 @@ async function pinFailures(page, label) {
       }
       return out;
     },
-    { label, art: { width: HERO.width, height: HERO.height, bee: HERO.bee.box, maxCrop: MAX_CROP }, gap: GAP },
+    { label, art: { width: HERO.width, height: HERO.height, night: HERO.night, bee: HERO.bee.box, maxCrop: MAX_CROP }, gap: GAP },
   );
 }
 
 test.describe("the hero art, pinned to its box's bottom right on whole device pixels", () => {
   test.skip(({ isMobile }) => isMobile, "covered by the desktop projects");
+  // Each test resizes one page through the whole grid, up to 15360 device pixels wide in WebKit.
+  test.slow();
 
   for (const deviceScaleFactor of [1, 1.1, 1.25, 1.5, 2, 3]) {
     test(`at ${deviceScaleFactor}x`, async ({ browser }) => {
@@ -112,7 +123,8 @@ test.describe("the hero art, pinned to its box's bottom right on whole device pi
       await expect(page.locator(".hero-art")).toHaveClass(/is-snapped/);
       await expect(page.locator(".hero-art canvas")).toBeAttached();
       const failures = [];
-      for (const [width, height] of PIN_SIZES) {
+      // No screen is wider than 8K: skip the sizes that would exceed it at this ratio.
+      for (const [width, height] of PIN_SIZES.filter(([width]) => width * deviceScaleFactor <= 7680)) {
         await page.setViewportSize({ width, height });
         failures.push(...(await pinFailures(page, `${width}x${height}@${deviceScaleFactor}`)));
       }

@@ -137,7 +137,7 @@ Atkinson Hyperlegible was drawn by the Braille Institute for low-vision readers:
 - The art is pinned to the bottom right of its box: a box of another shape crops its left (on
   phones) or its top (on wide screens), never the meadow or the light. From 1100px the hero is 2:1
   where it fits, grows up to the first screen (`hero-fold`), and never gets so short that a very
-  wide screen crops the bee (`hero-bee-min`).
+  wide screen crops the bee (`hero-bee-min`, at a browser zoom of 67% or more).
 - Tap targets are at least `tap-min` (44px) tall.
 
 ## Shape: pixels, frames and drops
@@ -203,8 +203,8 @@ Atkinson Hyperlegible was drawn by the Braille Institute for low-vision readers:
 - A click on the art plays one more loop, on from where the bee is, and so does Replay, a button
   that shows only on keyboard focus. Motion the visitor starts lasts six seconds at most, and
   clicks never stack.
-- `prefers-reduced-motion` keeps the still image from the start, with no Replay. Off screen, the
-  loop pauses.
+- `prefers-reduced-motion` keeps the still image from the start, with no Replay. While the bee is
+  out of view, or the tab hidden, the loop pauses.
 - Nothing flashes more than three times a second.
 
 ## Pixel art
@@ -227,9 +227,12 @@ Atkinson Hyperlegible was drawn by the Braille Institute for low-vision readers:
 - On dark grounds, keep the bee's silhouette whole: a cool rim (`slate`, `deep-teal`) under its dark
   parts.
 - In the hero, the sky behind the copy (columns 0 to 150, rows 0 to 105) stays dark: only `night`,
-  `dusk`, `slate`, a few `deep-teal` stars and dark hills. Its first 21 rows are night, down to the
-  middle of its hatched edge into dusk, so a wide screen may crop them with no seam under the
-  night header. The last 6 rows are `hive`, so the art melts into the page. Tests enforce all three.
+  `dusk`, `slate`, a few `deep-teal` stars and dark hills. Its first 21 rows are mostly night,
+  down to the middle of its hatched edge into dusk, so cropping them leaves no seam under the
+  night header. From 1100px some windows crop more, and the header then meets the dusk in a
+  near-straight line: a 1080p browser window (22 to 28 rows), widths just past a multiple of 300
+  device pixels (up to 30), short 21:9 windows (32 to 36, through the clouds and the evening star).
+  The last 6 rows are `hive`, so the art melts into the page. Tests enforce all three.
 - Everything is drawn in code (`art/` in the website repository) and generated: change the source,
   never the image.
 
